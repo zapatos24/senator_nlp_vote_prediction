@@ -130,3 +130,12 @@ dmypy.json
 
 #Native Mac files
 .DS_Store
+
+# PyCharm
+.idea
+
+# Node
+node_modules
+
+# Serverless
+.serverless

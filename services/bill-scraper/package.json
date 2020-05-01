@@ -1,0 +1,14 @@
+{
+  "name": "bill-scraper",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "deploy": "sls deploy -v",
+    "destroy": "sls remove -v",
+    "start": "npm i && pip3 install -r requirements.txt"
+  },
+  "devDependencies": {
+    "serverless-prune-plugin": "^1.4.2",
+    "serverless-python-requirements": "^5.0.1"
+  }
+}
