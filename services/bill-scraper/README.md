@@ -1,9 +1,11 @@
 # Bill Scraping Service
 
 To get started, install required packages by navigating to this directory and running:
+
 ```npm run start```
 
 Make sure your AWS credentials are configured, by running:
+
 ```aws configure```
 
 ## Downloading bills locally
@@ -18,6 +20,7 @@ S3 buckets are unique across all of AWS, so you'll need to change this - drop th
 Now take this bucket name, go to S3 in your AWS account, and create this bucket (does not need to be publicly accessible).
 
 Now, you're ready to deploy your serverless service by running:
+
 ```npm run deploy```
 
 #### Triggering Service
