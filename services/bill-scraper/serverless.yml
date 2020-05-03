@@ -25,7 +25,7 @@ provider:
 custom:
   namespace: ${{self:service}}-${{self:provider.stage}}
   buckets:
-    bills: senator-nlp-vote-prediction-1234
+    bills: senator-nlp-vote-prediction
   queues:
     sessions: ${{self:custom.namespace}}-congSessions
 #  pythonRequirements:

@@ -19,7 +19,7 @@ def handler(event, context):
             message = loads(item['body'])
             cong = message.get('congress')
             sess = message.get('session')
-
+            print('S3_BUCKET: %s' % S3_BUCKET)
             target = url_base + '%d/%d/s/BILLS-%d-%d-s.zip' % (cong, sess, cong, sess)
             r = requests.get(target, stream=True)
             chunk_size = 8192
