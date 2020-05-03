@@ -1,0 +1,259 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "The AWS CloudFormation template for this Serverless application",
+  "Resources": {
+    "ServerlessDeploymentBucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "ServerlessDeploymentBucketPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "ServerlessDeploymentBucket"
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:*",
+              "Effect": "Deny",
+              "Principal": "*",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "ServerlessDeploymentBucket"
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              ],
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": false
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "DownloadBillsLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/lambda/bill-scraper-dev-downloadBills"
+      }
+    },
+    "IamRoleLambdaExecution": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "lambda.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": {
+              "Fn::Join": [
+                "-",
+                [
+                  "bill-scraper-dev",
+                  "lambda"
+                ]
+              ]
+            },
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "logs:CreateLogStream",
+                    "logs:CreateLogGroup"
+                  ],
+                  "Resource": [
+                    {
+                      "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/bill-scraper-dev*:*"
+                    }
+                  ]
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "logs:PutLogEvents"
+                  ],
+                  "Resource": [
+                    {
+                      "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/bill-scraper-dev*:*:*"
+                    }
+                  ]
+                },
+                {
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::Sub": "arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:*"
+                  },
+                  "Action": "sqs:*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::Sub": "arn:aws:s3:::*"
+                  },
+                  "Action": "s3:*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::Sub": "arn:aws:lambda:::function:*"
+                  },
+                  "Action": "lambda:InvokeFunction"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "sqs:ReceiveMessage",
+                    "sqs:DeleteMessage",
+                    "sqs:GetQueueAttributes"
+                  ],
+                  "Resource": [
+                    {
+                      "Fn::GetAtt": [
+                        "sessionsQueue",
+                        "Arn"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        "Path": "/",
+        "RoleName": {
+          "Fn::Join": [
+            "-",
+            [
+              "bill-scraper-dev",
+              {
+                "Ref": "AWS::Region"
+              },
+              "lambdaRole"
+            ]
+          ]
+        }
+      }
+    },
+    "DownloadBillsLambdaFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "ServerlessDeploymentBucket"
+          },
+          "S3Key": "serverless/bill-scraper/dev/1588366087669-2020-05-01T20:48:07.669Z/bill-scraper.zip"
+        },
+        "FunctionName": "bill-scraper-dev-downloadBills",
+        "Handler": "handlers/download_bills.handler",
+        "MemorySize": 256,
+        "Role": {
+          "Fn::GetAtt": [
+            "IamRoleLambdaExecution",
+            "Arn"
+          ]
+        },
+        "Runtime": "python3.7",
+        "Timeout": 120,
+        "Environment": {
+          "Variables": {
+            "BILL_BUCKET": "senator-nlp-vote-prediction-1234"
+          }
+        }
+      },
+      "DependsOn": [
+        "DownloadBillsLogGroup",
+        "IamRoleLambdaExecution"
+      ]
+    },
+    "DownloadBillsLambdaVersionADtCmTitf8mayKZOY1phBQ4fSKpSvoSDHCdRQENzCgQ": {
+      "Type": "AWS::Lambda::Version",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "DownloadBillsLambdaFunction"
+        },
+        "CodeSha256": "x2O3/74TiDW0Q3yIp7uSp+0feKAw4V+7TQqdKfNVRjI="
+      }
+    },
+    "DownloadBillsEventSourceMappingSQSSessionsQueue": {
+      "Type": "AWS::Lambda::EventSourceMapping",
+      "DependsOn": "IamRoleLambdaExecution",
+      "Properties": {
+        "BatchSize": 1,
+        "EventSourceArn": {
+          "Fn::GetAtt": [
+            "sessionsQueue",
+            "Arn"
+          ]
+        },
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "DownloadBillsLambdaFunction",
+            "Arn"
+          ]
+        },
+        "Enabled": true
+      }
+    },
+    "sessionsQueue": {
+      "Type": "AWS::SQS::Queue",
+      "Properties": {
+        "QueueName": "bill-scraper-dev-congSessions",
+        "VisibilityTimeout": 720
+      }
+    }
+  },
+  "Outputs": {
+    "ServerlessDeploymentBucketName": {
+      "Value": {
+        "Ref": "ServerlessDeploymentBucket"
+      }
+    },
+    "DownloadBillsLambdaFunctionQualifiedArn": {
+      "Description": "Current Lambda function version",
+      "Value": {
+        "Ref": "DownloadBillsLambdaVersionADtCmTitf8mayKZOY1phBQ4fSKpSvoSDHCdRQENzCgQ"
+      }
+    }
+  }
+}
