@@ -1,0 +1,70 @@
+service: bill-scraper
+
+provider:
+  name: aws
+  profile: default  # this references local aws config settings for deployment
+  runtime: python3.7
+  stage: ${{opt.stage, "dev"}}
+  variableSyntax: '\${{([\s\S]+?)}}'
+  memorySize: 256
+  timeout: 60
+  iamRoleStatements:
+    - Effect: Allow
+      Resource:
+        Fn::Sub: arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:*
+      Action: sqs:*
+    - Effect: Allow
+      Resource:
+        Fn::Sub: arn:aws:s3:::*
+      Action: s3:*
+    - Effect: Allow
+      Resource:
+        Fn::Sub: arn:aws:lambda:::function:*
+      Action: lambda:InvokeFunction
+
+custom:
+  namespace: ${{self:service}}-${{self:provider.stage}}
+  buckets:
+    bills: senator-nlp-vote-prediction
+  queues:
+    sessions: ${{self:custom.namespace}}-congSessions
+#  pythonRequirements:
+#    dockerizePip: true
+  prune:
+    automatic: true
+    number: 5
+
+functions:
+  downloadBills:
+    # Event: item in sessions queue
+    # Action: gets a session off of queue, pulls zip files from govinfo.gov
+    # Result: pushes files to S3 bucket
+    handler: handlers/download_bills.handler
+    timeout: 120
+    environment:
+      BILL_BUCKET: ${{self:custom.buckets.bills}}
+    events:
+      - sqs:
+          batchSize: 1 # Each download is ~100MB, only get one
+          arn:
+            Fn::GetAtt:
+              - sessionsQueue
+              - Arn
+
+# CloudFormation resource templates
+resources:
+  Resources:
+    sessionsQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${{self:custom.queues.sessions}}
+        VisibilityTimeout: 720 # Set to 6x the consuming lambda timeout per AWS docs
+
+package:
+  excludeDevDependencies: false
+  exclude:
+    - node_modules/**
+
+plugins:
+  - serverless-prune-plugin
+  - serverless-python-requirements
