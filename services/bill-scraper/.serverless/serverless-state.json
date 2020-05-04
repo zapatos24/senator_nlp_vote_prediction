@@ -209,7 +209,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/bill-scraper/dev/1588366087669-2020-05-01T20:48:07.669Z/bill-scraper.zip"
+                "S3Key": "serverless/bill-scraper/dev/1588619786148-2020-05-04T19:16:26.148Z/bill-scraper.zip"
               },
               "FunctionName": "bill-scraper-dev-downloadBills",
               "Handler": "handlers/download_bills.handler",
@@ -224,7 +224,7 @@
               "Timeout": 120,
               "Environment": {
                 "Variables": {
-                  "BILL_BUCKET": "senator-nlp-vote-prediction-1234"
+                  "BILL_BUCKET": "senator-nlp-vote-prediction"
                 }
               }
             },
@@ -233,7 +233,7 @@
               "IamRoleLambdaExecution"
             ]
           },
-          "DownloadBillsLambdaVersionADtCmTitf8mayKZOY1phBQ4fSKpSvoSDHCdRQENzCgQ": {
+          "DownloadBillsLambdaVersionKlfg25hFOE841K7xlSuWWqmB601f0xVsdoffIJtNQ": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
@@ -280,7 +280,7 @@
           "DownloadBillsLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "DownloadBillsLambdaVersionADtCmTitf8mayKZOY1phBQ4fSKpSvoSDHCdRQENzCgQ"
+              "Ref": "DownloadBillsLambdaVersionKlfg25hFOE841K7xlSuWWqmB601f0xVsdoffIJtNQ"
             }
           }
         }
@@ -357,7 +357,7 @@
     "custom": {
       "namespace": "bill-scraper-dev",
       "buckets": {
-        "bills": "senator-nlp-vote-prediction-1234"
+        "bills": "senator-nlp-vote-prediction"
       },
       "queues": {
         "sessions": "bill-scraper-dev-congSessions"
@@ -377,7 +377,7 @@
         "handler": "handlers/download_bills.handler",
         "timeout": 120,
         "environment": {
-          "BILL_BUCKET": "senator-nlp-vote-prediction-1234"
+          "BILL_BUCKET": "senator-nlp-vote-prediction"
         },
         "events": [
           {
@@ -394,7 +394,7 @@
         "memory": 256,
         "runtime": "python3.7",
         "vpc": {},
-        "versionLogicalId": "DownloadBillsLambdaVersionADtCmTitf8mayKZOY1phBQ4fSKpSvoSDHCdRQENzCgQ"
+        "versionLogicalId": "DownloadBillsLambdaVersionKlfg25hFOE841K7xlSuWWqmB601f0xVsdoffIJtNQ"
       }
     },
     "resources": {
@@ -415,7 +415,7 @@
     "artifact": "/Users/flatironschool/dev/postBootcamp/sm_project/senator_nlp_vote_prediction/services/bill-scraper/.serverless/bill-scraper.zip"
   },
   "package": {
-    "artifactDirectoryName": "serverless/bill-scraper/dev/1588366087669-2020-05-01T20:48:07.669Z",
+    "artifactDirectoryName": "serverless/bill-scraper/dev/1588619786148-2020-05-04T19:16:26.148Z",
     "artifact": "bill-scraper.zip"
   }
 }
