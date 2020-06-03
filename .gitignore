@@ -139,3 +139,10 @@ node_modules
 
 # Serverless
 .serverless
+
+# Folders not useful to model
+/TFIDF_work
+/bill_text
+
+# Folders not to be uploaded to GitHub (too large)
+/universal-sentence-encoder_4
