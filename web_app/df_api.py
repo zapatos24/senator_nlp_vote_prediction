@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import pickle as pkl
 
-class DataframeFunctions:
+class DataframeHandler:
     def __init__(self):
         self.path = '../main_df.pkl'
         self.df = pd.read_pickle(self.path)
