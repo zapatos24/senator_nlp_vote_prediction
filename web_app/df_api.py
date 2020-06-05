@@ -9,13 +9,13 @@ class DataframeHandler:
 
 
     def congress_subset(self, congress):
-        cong_df = self.df[self.df.congress.isin(congress)]
+        cong_df = self.df[self.df.congress == congress]
 
         return cong_df
 
 
     def bill_subset(self, bill_num, subset_df):
-        bill_df = subset_df[subset_df.bill_number.isin(bill_num)]
+        bill_df = subset_df[subset_df.bill_number == bill_num]
 
         return bill_df
 
