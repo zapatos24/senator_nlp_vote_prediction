@@ -1,11 +1,11 @@
 import pandas as pd
 import numpy as np
-import pickle as pkl
+import joblib
 
 class DataframeHandler:
     def __init__(self):
-        self.path = '../main_df.pkl'
-        self.df = pd.read_pickle(self.path)
+        self.path = '../final_xgb_df.sav'
+        self.df = joblib.load(self.path)
 
 
     def congress_subset(self, congress):
