@@ -20,6 +20,18 @@ class DataframeHandler:
         return bill_df
 
 
+    def unique_subset(self, unique_col, unique_vals, subset_df, cols_to_return=[]):
+        new_df = subset_df[subset_df[unique_col].isin(unique_vals)]
+
+        if cols_to_return:
+            try:
+                return new_df[cols_to_return]
+            except:
+                print('One of cols not in dataframe.')
+        else:
+            return new_df
+
+
     def get_unique_values(self, col_name, subset_df):
         return subset_df[col_name].unique()
 
