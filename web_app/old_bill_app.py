@@ -20,7 +20,7 @@ def old_bill_search():
 
     bill_subset = df.bill_subset(bill_num, cong_subset)
 
-    st.write('Bill Number: ', bill_num)
+    st.write('**Bill Number**: ', bill_num)
 
     #set button to send to model
     start = st.button('Bill Look Up')
@@ -29,13 +29,15 @@ def old_bill_search():
     if start:
         model = ModelHandler()
 
-        predict_df = model.predict(bill_subset)
+        predict_df = model.predict(bill_subset, 'old')
 
         def pass_or_not(df):
-            if sum([round(x) for x in df.predict_proba.values]) > 50:
+            if sum(predict_df['predict_cast'] == 'yea') > 50:
                 return "Pass"
-            else:
+            elif sum(predict_df['predict_cast'] == 'nay') > 50:
                 return "Fail"
+            else:
+                return "Uncertain"
 
         st.write('Pass or Fail: ', pass_or_not(predict_df))
         st.write('Yea votes: ', str(sum(predict_df['predict_cast'] == 'yea')))

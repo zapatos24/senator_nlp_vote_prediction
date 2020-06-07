@@ -14,7 +14,7 @@ from new_bill_app import new_bill_search
 # from model_api import ModelHandler
 
 '''
-# How will They Vote?
+# How Will They Vote?
 
 Please choose an option from the sidebar
 '''
@@ -36,7 +36,7 @@ def new_bill_page(state):
 
     st.markdown('This is specific to the 116th Congress')
     st.markdown('Please enter your bill information in the sidebar')
-    
+
     new_bill_search()
 
 

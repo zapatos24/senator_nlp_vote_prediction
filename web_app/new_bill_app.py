@@ -10,8 +10,7 @@ def new_bill_search():
 
     congress = 116
     cong_senators = df.unique_subset('bioname', 
-                                     df.congress_subset(congress),
-                                     ['bioname', 'party'])
+                                     df.congress_subset(congress))
 
     bill_summary = st.sidebar.text_area('Bill summary:', "")
     sponsor_party = st.sidebar.selectbox('Sponsor Party', ['D', 'R', 'I'])
@@ -24,6 +23,7 @@ def new_bill_search():
     st.write('**Congress**: ', congress)
     st.write('**Bill Number**: Test Bill')
     st.write('**Bill Summary**: ', bill_summary)
+    st.write('**Sponsor Party**: ', sponsor_party)
     st.write('**Democrat Cosponsors**: ', num_cospon_D)
     st.write('**Republican Cosponsors**: ', num_cospon_R)
     st.write('**Independent Cosponsors**: ', num_cospon_I)
@@ -37,19 +37,21 @@ def new_bill_search():
     if start:
         model = ModelHandler()
 
-        predict_df = model.predict(bill_subset)
+        predict_df = model.predict(cong_senators)
 
         def pass_or_not(df):
-            if sum([round(x) for x in df.predict_proba.values]) > 50:
+            if sum(predict_df['predict_cast'] == 'yea') > 50:
                 return "Pass"
-            else:
+            elif sum(predict_df['predict_cast'] == 'nay') > 50:
                 return "Fail"
+            else:
+                return "Uncertain"
 
         st.write('Pass or Fail: ', pass_or_not(predict_df))
         st.write('Yea votes: ', str(sum(predict_df['predict_cast'] == 'yea')))
         st.write('Nay votes: ', str(sum(predict_df['predict_cast'] == 'nay')))
 
-        nominate_df = bill_subset.join(predict_df[['predict_proba', 'predict_cast']])
+        nominate_df = cong_senators.join(predict_df[['predict_proba', 'predict_cast']])
 
         '''
         ### Distribution of predicted votes and dw_nominate score.
