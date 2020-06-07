@@ -8,6 +8,7 @@ import numpy as np
 import plotly_express as px
 
 from old_bill_app import old_bill_search
+from new_bill_app import new_bill_search
 
 # from df_api import DataframeHandler
 # from model_api import ModelHandler
@@ -20,7 +21,7 @@ Please choose an option from the sidebar
 
 def main():
     pages = {
-        # "New Bills": new_bill_page,
+        "New Bills": new_bill_page,
         "Old Bills": old_bill_page,
     }
 
@@ -34,8 +35,8 @@ def new_bill_page(state):
     st.markdown('# New Bill Voting')
 
     st.markdown('This is specific to the 116th Congress')
-    st.markdown('Congress guide:')
-
+    st.markdown('Please enter your bill information in the sidebar')
+    
     new_bill_search()
 
 
