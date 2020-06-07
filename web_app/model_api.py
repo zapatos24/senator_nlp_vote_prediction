@@ -5,12 +5,9 @@ import xgboost as xgb
 import tensorflow as tf
 import tensorflow_hub as hub
 from sklearn.preprocessing import StandardScaler
-# from sklearn.metrics import roc_auc_score
-# from sklearn.metrics import roc_curve
-# from sklearn.metrics import classification_report, 
-# from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score
-# from sklearn.metrics import f1_score
+
+from helperfunc import find_cosponsor_of_my_party, calc_cosponsor_party_percent
 
 class ModelHandler:
     def __init__(self):
@@ -44,9 +41,11 @@ class ModelHandler:
         return X_embed
 
 
-    def make_predictions_df(self, main_df, predictions_list):
-        main_df_features = ['bioname', 'party', 'cast_code']
-        subset_df = main_df[main_df_features].copy()
+    def make_predictions_df(self, bill_df, predictions_list, bill_type='new'):
+        bill_df_features = ['bioname', 'party']
+        if bill_type == 'old':
+            bill_df_features.append('cast_code')
+        subset_df = bill_df[bill_df_features].copy()
 
         pred_df = pd.DataFrame(predictions_list, index=subset_df.index, columns=['predict_proba'])
 
@@ -55,9 +54,39 @@ class ModelHandler:
         return subset_df.join(pred_df)
 
 
-    def predict(self, df):
+    def make_new_bill_df(self, bill_sum, sponsor_party, num_co_D, num_co_R, num_co_I, senator_df):
+        new_df = senator_df.copy()
+        new_df['summary'] = bill_sum
+        new_df['sponsor_party'] == sponsor_party
+        new_df['cosponsors'] = num_co_D + num_co_R + num_co_I
+        new_df['cosponsors_D'] = num_co_D
+        new_df['cosponsors_R'] = num_co_R
+        new_df['cosponsors_ID'] = num_co_I
+
+        new_df['cosponsors^2'] = new_df['cosponsors']**2
+
+        for party in ['D', 'R', 'ID']:
+            title = 'cosponsors_'+party+'^2'
+            new_df[title] = new_df['cosponsors_'+party]**2
+
+        new_df['sponsor_is_same_party'] = new_df.apply(lambda x: 1 if x['party'] == x['sponsor_party'] else 0, axis=1)
+
+        new_df['cosponsor_my_party'] = new_df.apply(lambda x: find_cosponsor_of_my_party(x), axis=1)
+        new_df['cosponsor_my_party^2'] = new_df['cosponsor_my_party']**2
+
+        for party in ['D', 'R']:
+            new_df['cosponsor_party_{}_%'.format(party)] = new_df.apply(lambda x: calc_cosponsor_party_percent(x, party), 
+                                                                        axis=1)
+
+        new_df['percent_cosponsors_lead_party'] = new_df.apply(lambda x: x['cosponsor_party_D_%'] 
+                                                               if x['lead_party'] == 'D'
+                                                               else x['cosponsor_party_R_%'], axis=1)
+
+        return new_df
+
+
+    def predict(self, df, bill_type='new'):
         X = df[self.features]
-        y = df['cast_code']
 
         text_cols = ['summary']
 
@@ -73,7 +102,7 @@ class ModelHandler:
         predictions_xgb = self.model.predict_proba(X_sc_df)
         predictions_xgb = [item[1] for item in predictions_xgb]
 
-        predictions_df = self.make_predictions_df(df, predictions_xgb)
+        predictions_df = self.make_predictions_df(df, predictions_xgb, bill_type)
 
         return predictions_df
 
