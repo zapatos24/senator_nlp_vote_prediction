@@ -20,8 +20,9 @@ class DataframeHandler:
         return bill_df
 
 
-    def unique_subset(self, unique_col, unique_vals, subset_df, cols_to_return=[]):
-        new_df = subset_df[subset_df[unique_col].isin(unique_vals)]
+    def unique_subset(self, unique_col, subset_df, cols_to_return=[]):
+        # unique_vals = subset_df[unique_col].unique()
+        new_df = subset_df.drop_duplicates(subset=unique_col, keep='last')
 
         if cols_to_return:
             try:

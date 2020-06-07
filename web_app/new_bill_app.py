@@ -9,13 +9,15 @@ def new_bill_search():
     df = DataframeHandler()
 
     congress = 116
-    cong_subset = df.congress_subset(congress)
+    cong_senators = df.unique_subset('bioname', 
+                                     df.congress_subset(congress),
+                                     ['bioname', 'party'])
 
     bill_summary = st.sidebar.text_area('Bill summary:', "")
     sponsor_party = st.sidebar.selectbox('Sponsor Party', ['D', 'R', 'I'])
-    num_cospon_D = st.sidebar.slider("Democrat Cosponsors", 0, sum(cong_subset.party == 'D'))
-    num_cospon_R = st.sidebar.slider("Republican Cosponsors", 0, sum(cong_subset.party == 'R'))
-    num_cospon_I = st.sidebar.slider("Independent Cosponsors", 0, sum(cong_subset.party == 'I'))
+    num_cospon_D = st.sidebar.slider("Democrat Cosponsors", 0, sum(cong_senators.party == 'D'))
+    num_cospon_R = st.sidebar.slider("Republican Cosponsors", 0, sum(cong_senators.party == 'R'))
+    num_cospon_I = st.sidebar.slider("Independent Cosponsors", 0, sum(cong_senators.party == 'I'))
 
     num_cospon_tot = num_cospon_D + num_cospon_R + num_cospon_I
 
