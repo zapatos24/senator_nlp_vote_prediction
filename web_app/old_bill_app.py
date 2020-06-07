@@ -6,30 +6,12 @@ from df_api import DataframeHandler
 from model_api import ModelHandler
 
 def old_bill_search():
-    ''' 
-    # Old Bill Voting
-
-    Comparing model against reality
-
-    Congress guide:
-
-    **116**: 2018 - 2020
-
-    **115**: 2016 - 2018
-
-    **114**: 2014 - 2016
-
-    **113**: 2012 - 2014
-    '''
-
     df = DataframeHandler()
 
-
     congress = st.sidebar.selectbox('Congress?', df.get_unique_values('congress', df.df))
-
     cong_subset = df.congress_subset(congress)
 
-    st.write('Congress: ', congress)
+    st.write('**Congress**: ', congress)
 
     bill_num = st.sidebar.selectbox('Bill number?', 
                                       df.get_unique_values(col_name='bill_number', 
