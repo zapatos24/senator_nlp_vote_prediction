@@ -27,35 +27,25 @@ def old_bill_search():
     stop = st.button('Reset')
 
     if start:
-        model = ModelHandler()
-
-        predict_df = model.predict(bill_subset, 'old')
-
         def pass_or_not(df):
-            if sum(predict_df['predict_cast'] == 'yea') > 50:
+            if sum(bill_subset['predict_cast'] == 1) > 50:
                 return "Pass"
-            elif sum(predict_df['predict_cast'] == 'nay') > 50:
+            elif sum(bill_subset['predict_cast'] == 0) > 50:
                 return "Fail"
             else:
                 return "Uncertain"
 
-        st.write('Pass or Fail: ', pass_or_not(predict_df))
-        st.write('Yea votes: ', str(sum(predict_df['predict_cast'] == 'yea')))
-        st.write('Nay votes: ', str(sum(predict_df['predict_cast'] == 'nay')))
+        st.write('Pass or Fail: ', pass_or_not(bill_subset))
+        st.write('Yea votes: ', str(sum(bill_subset['predict_cast'] == 1)))
+        st.write('Nay votes: ', str(sum(bill_subset['predict_cast'] == 0)))
 
-        nominate_df = bill_subset.join(predict_df[['predict_proba', 'predict_cast']])
+        st.markdown('### Distribution of predicted votes and dw_nominate score.')
 
-        '''
-        ### Distribution of predicted votes and dw_nominate score.
-        '''
-
-        fig = px.scatter(nominate_df, x ='nominate_dim1', y='predict_proba', color='party')
+        fig = px.scatter(bill_subset, x ='nominate_dim1', y='predict_proba', color='party')
 
         st.plotly_chart(fig)
 
-        '''
-        ### The full breakdown of votes
-        '''
+        st.markdown('### The full breakdown of votes')
 
-        st.write(predict_df.sort_values(['party', 'predict_proba'], ascending=False))
+        st.write(df.get_vote_breakdown(bill_subset).sort_values(['party', 'predict_proba'], ascending=False))
 
