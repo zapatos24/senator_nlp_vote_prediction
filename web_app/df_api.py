@@ -1,10 +1,9 @@
 import pandas as pd
-import numpy as np
 import joblib
 
 class DataframeHandler:
     def __init__(self):
-        self.path = '../pred_xgb_df.sav'
+        self.path = 'pred_xgb_df.sav'
         self.df = joblib.load(self.path)
 
 

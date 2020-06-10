@@ -3,15 +3,8 @@ from streamlit.ReportThread import get_report_ctx
 from streamlit.hashing import _CodeHasher
 from streamlit.server.Server import Server
 
-import pandas as pd
-import numpy as np
-import plotly_express as px
-
 from old_bill_app import old_bill_search
 from new_bill_app import new_bill_search
-
-# from df_api import DataframeHandler
-# from model_api import ModelHandler
 
 '''
 # How Will They Vote?
@@ -52,38 +45,6 @@ def old_bill_page(state):
                  **113**: 2012 - 2014')
 
     old_bill_search()
-
-    # st.title(":wrench: Settings")
-    # display_state_values(state)
-
-    # st.write("---")
-    # options = ["Hello", "World", "Goodbye"]
-    # state.input = st.text_input("Set input value.", state.input or "")
-    # state.slider = st.slider("Set slider value.", 1, 10, state.slider)
-    # state.radio = st.radio("Set radio value.", options, options.index(state.radio) if state.radio else 0)
-    # state.checkbox = st.checkbox("Set checkbox value.", state.checkbox)
-    # state.selectbox = st.selectbox("Select value.", options, options.index(state.selectbox) if state.selectbox else 0)
-    # state.multiselect = st.multiselect("Select value(s).", options, state.multiselect)
-
-    # # Dynamic state assignments
-    # for i in range(3):
-    #     key = f"State value {i}"
-    #     state[key] = st.slider(f"Set value {i}", 1, 10, state[key])
-
-
-def display_state_values(state):
-    st.write("Input state:", state.input)
-    st.write("Slider state:", state.slider)
-    st.write("Radio state:", state.radio)
-    st.write("Checkbox state:", state.checkbox)
-    st.write("Selectbox state:", state.selectbox)
-    st.write("Multiselect state:", state.multiselect)
-    
-    for i in range(3):
-        st.write(f"Value {i}:", state[f"State value {i}"])
-
-    if st.button("Clear state"):
-        state.clear()
 
 
 class _SessionState:

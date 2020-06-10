@@ -1,9 +1,8 @@
 import streamlit as st
-import pandas as pd
-import numpy as np
 import plotly_express as px
+
 from df_api import DataframeHandler
-from model_api import ModelHandler
+# from model_api import ModelHandler
 
 def old_bill_search():
     df = DataframeHandler()
