@@ -12,7 +12,7 @@ def find_cosponsor_of_my_party(senator):
 
 def calc_cosponsor_party_percent(df, party_code):
     if df['cosponsors_{}'.format(party_code)] > 0:
-        return round(df['cosponsors_{}'.format(party)] / (df['cosponsors_D'] + \
+        return round(df['cosponsors_{}'.format(party_code)] / (df['cosponsors_D'] + \
                                                           df['cosponsors_R'] + \
                                                           df['cosponsors_ID']), 3)
     else:
