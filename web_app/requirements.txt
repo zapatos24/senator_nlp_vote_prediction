@@ -1,0 +1,9 @@
+# external requirements
+streamlit
+pandas
+joblib
+plotly_express
+gunicorn
+fastapi
+grpcio-tools
+uvicorn

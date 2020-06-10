@@ -1,10 +1,9 @@
 import pandas as pd
-import numpy as np
 import joblib
 
 class DataframeHandler:
     def __init__(self):
-        self.path = '../final_xgb_df.sav'
+        self.path = 'pred_xgb_df.sav'
         self.df = joblib.load(self.path)
 
 
@@ -35,4 +34,9 @@ class DataframeHandler:
 
     def get_unique_values(self, col_name, subset_df):
         return subset_df[col_name].unique()
+
+
+    def get_vote_breakdown(self, subset_df):
+        app_cols = ['bioname', 'party', 'predict_proba', 'cast_code', 'predict_cast']
+        return subset_df[app_cols]
 

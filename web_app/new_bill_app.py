@@ -1,9 +1,7 @@
 import streamlit as st
-import pandas as pd
-import numpy as np
 import plotly_express as px
 from df_api import DataframeHandler
-from model_api import ModelHandler
+# from model_api import ModelHandler
 
 def new_bill_search():
     df = DataframeHandler()
@@ -34,35 +32,35 @@ def new_bill_search():
     start = st.button('Bill Look Up')
     stop = st.button('Reset')
 
-    if start:
-        model = ModelHandler()
+    # if start:
+        # model = ModelHandler()
 
-        predict_df = model.predict(cong_senators)
+        # predict_df = model.predict(cong_senators)
 
-        def pass_or_not(df):
-            if sum(predict_df['predict_cast'] == 'yea') > 50:
-                return "Pass"
-            elif sum(predict_df['predict_cast'] == 'nay') > 50:
-                return "Fail"
-            else:
-                return "Uncertain"
+        # def pass_or_not(df):
+        #     if sum(predict_df['predict_cast'] == 'yea') > 50:
+        #         return "Pass"
+        #     elif sum(predict_df['predict_cast'] == 'nay') > 50:
+        #         return "Fail"
+        #     else:
+        #         return "Uncertain"
 
-        st.write('Pass or Fail: ', pass_or_not(predict_df))
-        st.write('Yea votes: ', str(sum(predict_df['predict_cast'] == 'yea')))
-        st.write('Nay votes: ', str(sum(predict_df['predict_cast'] == 'nay')))
+        # st.write('Pass or Fail: ', pass_or_not(predict_df))
+        # st.write('Yea votes: ', str(sum(predict_df['predict_cast'] == 'yea')))
+        # st.write('Nay votes: ', str(sum(predict_df['predict_cast'] == 'nay')))
 
-        nominate_df = cong_senators.join(predict_df[['predict_proba', 'predict_cast']])
+        # nominate_df = cong_senators.join(predict_df[['predict_proba', 'predict_cast']])
 
-        '''
-        ### Distribution of predicted votes and dw_nominate score.
-        '''
+        # '''
+        # ### Distribution of predicted votes and dw_nominate score.
+        # '''
 
-        fig = px.scatter(nominate_df, x ='nominate_dim1', y='predict_proba', color='party')
+        # fig = px.scatter(nominate_df, x ='nominate_dim1', y='predict_proba', color='party')
 
-        st.plotly_chart(fig)
+        # st.plotly_chart(fig)
 
-        '''
-        ### The full breakdown of votes
-        '''
+        # '''
+        # ### The full breakdown of votes
+        # '''
 
-        st.write(predict_df.sort_values(['party', 'predict_proba'], ascending=False))
+        # st.write(predict_df.sort_values(['party', 'predict_proba'], ascending=False))
