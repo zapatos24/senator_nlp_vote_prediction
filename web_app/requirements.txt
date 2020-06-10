@@ -1,12 +1,9 @@
 # external requirements
 streamlit
 pandas
-numpy
 joblib
-scikit-learn
-sklearn
-tensorflow
-tensorflow_hub
-xgboost
 plotly_express
 gunicorn
+fastapi
+grpcio-tools
+uvicorn
