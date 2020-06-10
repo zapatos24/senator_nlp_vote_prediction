@@ -146,3 +146,6 @@ node_modules
 
 # Folders not to be uploaded to GitHub (too large)
 /universal-sentence-encoder_4
+
+#key to ssh into EC2 instance
+senator_prediction_ec2_key.pem
