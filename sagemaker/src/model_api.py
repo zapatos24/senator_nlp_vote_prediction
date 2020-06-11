@@ -13,8 +13,8 @@ from helperfunc import find_cosponsor_of_my_party, calc_cosponsor_party_percent
 
 class ModelHandler:
 	model_path = os.path.join(os.path.abspath(os.getenv('XGB_MODEL_PATH')), 'final_xgb_model.sav')
-	scaler_path = os.path.join(os.path.abspath(os.getenv('XGB_MODEL_PATH')), '../final_xgb_scaler.sav')
-	feature_path = os.path.join(os.path.abspath(os.getenv('XGB_MODEL_PATH')), '../final_xgb_features.sav')
+	scaler_path = os.path.join(os.path.abspath(os.getenv('XGB_MODEL_PATH')), 'final_xgb_scaler.sav')
+	feature_path = os.path.join(os.path.abspath(os.getenv('XGB_MODEL_PATH')), 'final_xgb_features.sav')
 	embed_path = os.path.abspath(os.getenv('TFHUB_CACHE_DIR'))
 
 	model = joblib.load(model_path)

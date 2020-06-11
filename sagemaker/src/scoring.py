@@ -2,7 +2,7 @@
 
 from __future__ import print_function
 
-from pandas import to_json, read_json
+import pandas as pd
 import flask
 import json
 from json import encoder
@@ -47,11 +47,11 @@ def score():
                                        int(req['num_co_D']),
                                        int(req['num_co_R']),
                                        int(req['num_co_ID']),
-                                       read_json(req['dataframe']))
+                                       pd.read_json(req['dataframe']))
 
     result = {
         'name': 'senator-nlp-vote-prediction',
-        'score_data': to_json(ModelHandler.predict(df)),
+        'score_data': ModelHandler.predict(df).to_json(),
     }
     result_string = json.dumps(result)
 
