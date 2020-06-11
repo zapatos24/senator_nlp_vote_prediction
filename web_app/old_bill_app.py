@@ -22,8 +22,8 @@ def old_bill_search():
     st.write('**Bill Number**: ', bill_num)
 
     #set button to send to model
-    start = st.button('Bill Look Up')
-    stop = st.button('Reset')
+    start = st.sidebar.button('Bill Look Up')
+    stop = st.sidebar.button('Reset')
 
     if start:
         def pass_or_not(df):
@@ -34,9 +34,9 @@ def old_bill_search():
             else:
                 return "Uncertain"
 
-        st.write('Pass or Fail: ', pass_or_not(bill_subset))
-        st.write('Yea votes: ', str(sum(bill_subset['predict_cast'] == 1)))
-        st.write('Nay votes: ', str(sum(bill_subset['predict_cast'] == 0)))
+        st.write('**Pass or Fail**: ', pass_or_not(bill_subset))
+        st.write('**Yea votes**: ', str(sum(bill_subset['predict_cast'] == 1)))
+        st.write('**Nay votes**: ', str(sum(bill_subset['predict_cast'] == 0)))
 
         st.markdown("Below you can see a distribution of senators' DW-NOMINATE score  \
                      against the model's predicted probability that the senator will vote 'yea'  \
