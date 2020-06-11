@@ -17,6 +17,17 @@ final_xgb_scaler.sav
 
 From this directory, run `make build`
 
+Then, run `make local_server` to run the docker container at http://localhost:8080.
+
+Navigate to /ping to perform a health check, or post data to /invocations.
+
+
+## Testing
+
+For local testing, make sure the test file has `TEST_SERVER` set to `False` and run `python test/test.py`.
+
+After deployment, to test the Sagemaker service run the same command with `TEST_SERVER` set to `True`.
+
 ## Deployment
 
 

@@ -66,4 +66,5 @@ build:
 build_and_push:
 	sh ./build_and_push.sh
 
-
+local_server:
+	docker run --rm -p 127.0.0.1:8080:8080 models/senator-nlp-vote-prediction serve

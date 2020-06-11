@@ -1,17 +1,20 @@
 import boto3
 import json
 import pandas as pd
+import requests
+import os
 
-from df_api import DataframeHandler
+from web_app.df_api import DataframeHandler
 
-
-client = boto3.client('sagemaker-runtime')
+session = boto3.Session(profile_name='jeremy_sagemaker')
+client = session.client('sagemaker-runtime')
 
 custom_attributes = ''
 endpoint_name = "senator_nlp_vote_prediction"               # Endpoint name.
 content_type = "application/json"                           # The MIME type of the input data in the request body.
 accept = "application/json"                                 # The desired MIME type of the inference in the response.
 payload = "..."                                             # Payload for inference.
+
 
 
 def score(text):
@@ -27,10 +30,19 @@ def score(text):
         )['Body'].read().decode('utf-8')
 
 
+def score_local(text):
+
+    # from model_api import ModelHandler
+
+    return requests.post('http://localhost:8080/invocations', json=text).content
+
 
 df = DataframeHandler()
 cong_senators = df.unique_subset('bioname',
                                      df.congress_subset(116))
+
+import sys
+print(sys.getsizeof(cong_senators))
 
 test_item = {
     "dataframe": cong_senators.to_json(),
@@ -41,7 +53,12 @@ test_item = {
     "i_cosponsors": 0,
 }
 
-print(score(json.dumps(test_item)))
 
-# print(json.loads(json.dumps(test_item))[0])
+
+TEST_SERVER = False #os.getenv('TEST_SERVER', True)
+
+if TEST_SERVER:
+    print(score(json.dumps(test_item)))
+else:
+    print(score_local(json.dumps(test_item)))
 
