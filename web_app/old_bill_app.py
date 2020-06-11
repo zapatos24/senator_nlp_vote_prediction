@@ -26,17 +26,22 @@ def old_bill_search():
     stop = st.sidebar.button('Reset')
 
     if start:
-        def pass_or_not(df):
-            if sum(bill_subset['predict_cast'] == 1) > 50:
+        def pass_or_not(df, column):
+            if sum(bill_subset[column] == 1) > 50:
                 return "Pass"
-            elif sum(bill_subset['predict_cast'] == 0) > 50:
+            elif sum(bill_subset[column] == 0) > 50:
                 return "Fail"
             else:
                 return "Uncertain"
 
-        st.write('**Pass or Fail**: ', pass_or_not(bill_subset))
-        st.write('**Yea votes**: ', str(sum(bill_subset['predict_cast'] == 1)))
-        st.write('**Nay votes**: ', str(sum(bill_subset['predict_cast'] == 0)))
+        st.write('**Pass or Fail Actual**: ', pass_or_not(bill_subset, 'cast_code'), '  \n \
+                  **Yea votes**: ', str(sum(bill_subset['cast_code'] == 1)), '  \n \
+                  **Nay votes**: ', str(sum(bill_subset['cast_code'] == 0)))
+
+        st.write('**Pass or Fail Predicted**: ', pass_or_not(bill_subset, 'predict_cast'), '  \n \
+                  **Yea votes**: ', str(sum(bill_subset['predict_cast'] == 1)), '  \n \
+                  **Nay votes**: ', str(sum(bill_subset['predict_cast'] == 0)))
+
 
         st.markdown("Below you can see a distribution of senators' DW-NOMINATE score  \
                      against the model's predicted probability that the senator will vote 'yea'  \
