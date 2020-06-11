@@ -22,8 +22,8 @@ def old_bill_search():
     st.write('**Bill Number**: ', bill_num)
 
     #set button to send to model
-    start = st.button('Bill Look Up')
-    stop = st.button('Reset')
+    start = st.sidebar.button('Bill Look Up')
+    stop = st.sidebar.button('Reset')
 
     if start:
         def pass_or_not(df):
@@ -34,14 +34,24 @@ def old_bill_search():
             else:
                 return "Uncertain"
 
-        st.write('Pass or Fail: ', pass_or_not(bill_subset))
-        st.write('Yea votes: ', str(sum(bill_subset['predict_cast'] == 1)))
-        st.write('Nay votes: ', str(sum(bill_subset['predict_cast'] == 0)))
+        st.write('**Pass or Fail**: ', pass_or_not(bill_subset))
+        st.write('**Yea votes**: ', str(sum(bill_subset['predict_cast'] == 1)))
+        st.write('**Nay votes**: ', str(sum(bill_subset['predict_cast'] == 0)))
+
+        st.markdown("Below you can see a distribution of senators' DW-NOMINATE score  \
+                     against the model's predicted probability that the senator will vote 'yea'  \
+                     on the bill.")
+
+        st.markdown("The DW-NOMINATE score is a measure developed in the early  \
+                     1980's for scoring congresspeople based on ideology (liberal-conservative)  \
+                     and on more issue based politics. What is shown below is the first  \
+                     dimension of that score, the liberal-conservative spectrum.")
+
+        st.markdown("For a more detailed explanation on DW-NOMINATE, visit this  \
+                     [wikipedia article](https://en.wikipedia.org/wiki/NOMINATE_(scaling_method)) \
+                     on the subject.")
 
         st.markdown('### Distribution of predicted votes and dw_nominate score.')
-
-
-                                 # category_orders={'party':['D', 'R', 'I']},
 
         fig = px.scatter(bill_subset, x ='nominate_dim1', y='predict_proba', color='party', 
                          hover_name='bioname',

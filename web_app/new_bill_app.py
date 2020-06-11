@@ -29,8 +29,8 @@ def new_bill_search():
 
 
     #set button to send to model
-    start = st.button('Bill Look Up')
-    stop = st.button('Reset')
+    start = st.sidebar.button('Bill Look Up')
+    stop = st.sidebar.button('Reset')
 
     # if start:
         # model = ModelHandler()
