@@ -1,4 +1,4 @@
-FROM tensorflow/tensorflow:latest-py3
+FROM tensorflow/tensorflow:1.15.0-py3
 
 # Set up the program in the image
 RUN pip3 --no-cache-dir install \
