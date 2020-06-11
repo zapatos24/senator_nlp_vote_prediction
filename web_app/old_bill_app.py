@@ -53,11 +53,22 @@ def old_bill_search():
 
         st.markdown('### Distribution of predicted votes and dw_nominate score.')
 
-        fig = px.scatter(bill_subset, x ='nominate_dim1', y='predict_proba', color='party', 
+        fig = px.scatter(bill_subset, 
+                         x ='nominate_dim1', y='predict_proba', 
+                         color='party', 
                          hover_name='bioname',
-                         color_discrete_map={'D':'blue', 'R':'red', 'I':'lightgreen'},
-                         labels={'nominate_dim1': 'DW Nominate Score',
-                                 'predict_proba': 'Probability of Yea Vote'})
+                         hover_data={'nominate_dim1': False, 
+                                     'party': False, 
+                                     'predict_proba': ':.3f'},
+                         color_discrete_map={'D':'blue', 
+                                             'R':'red', 
+                                             'I':'lightgreen'}
+                        )
+
+        #labels={'nominate_dim1': 'DW Nominate Score','predict_proba': 'Probability of Yea Vote'}
+
+        fig.update_layout(xaxis_title="DW-NOMINATE Score",
+                          yaxis_title="Probability of Yea Vote")
 
         st.plotly_chart(fig)
 
