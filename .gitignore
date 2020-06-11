@@ -149,3 +149,6 @@ node_modules
 
 #key to ssh into EC2 instance
 senator_prediction_ec2_key.pem
+
+#files used in hyper parameter tuning, solely for local work
+/hyper_model_tuning
