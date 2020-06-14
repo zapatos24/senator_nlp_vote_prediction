@@ -1,4 +1,5 @@
 import pandas as pd
+import os
 import joblib
 
 class DataframeHandler:
@@ -25,17 +26,17 @@ class DataframeHandler:
         return bill_df
 
 
-    def unique_subset(self, unique_col, subset_df, cols_to_return=[]):
-        # unique_vals = subset_df[unique_col].unique()
-        new_df = subset_df.drop_duplicates(subset=unique_col, keep='last')
+    def get_senator_info(self, congress, df_size='small'):
+        cong_df = self.congress_subset(congress)
+        senator_df = cong_df.drop_duplicates(subset='bioname', keep='last')
+        if df_size == 'small':
+            short_cols = ['bioname', 'party', 'lead_party', 'nominate_dim1', 
+                          'nominate_dim2', 'age', 'tenure', 
+                          'percent_campaign_vote', 'party_R']
+            return senator_df[short_cols]
 
-        if cols_to_return:
-            try:
-                return new_df[cols_to_return]
-            except:
-                print('One of cols not in dataframe.')
         else:
-            return new_df
+            return senator_df
 
 
     def get_unique_values(self, col_names=[], col_values=[], unique_col=''):

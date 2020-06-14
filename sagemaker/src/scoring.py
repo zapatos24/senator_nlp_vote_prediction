@@ -42,16 +42,21 @@ def score():
                               status=415, mimetype='application/json')
     req = json.loads(data)
 
-    df = ModelHandler.make_new_bill_df(req['summary'],
-                                       req['sponsor_party'],
-                                       int(req['num_co_D']),
-                                       int(req['num_co_R']),
-                                       int(req['num_co_ID']),
-                                       pd.read_json(req['dataframe']))
+    # df = ModelHandler.make_new_bill_df(req['summary'],
+    #                                    req['sponsor_party'],
+    #                                    int(req['num_co_D']),
+    #                                    int(req['num_co_R']),
+    #                                    int(req['num_co_ID']),
+    #                                    pd.read_json(req['dataframe']))
 
     result = {
         'name': 'senator-nlp-vote-prediction',
-        'score_data': ModelHandler.predict(df).to_json(),
+        'score_data': ModelHandler.predict(req['summary'],
+                                           req['sponsor_party'],
+                                           int(req['num_co_D']),
+                                           int(req['num_co_R']),
+                                           int(req['num_co_ID']),
+                                           pd.read_json(req['dataframe'])).to_json()
     }
     result_string = json.dumps(result)
 

@@ -38,41 +38,37 @@ class ModelHandler:
 
 
 	@classmethod
-	def vectorize_text(cls, text_df, column_name):
-		X_embeddings = cls.embed(text_df.values)
-
-		short_col = column_name[:3]
-
-		cols = [short_col+'_'+str(i) for i in range(np.shape(X_embeddings)[1])]
-
-		X_embed = pd.DataFrame(np.asarray(X_embeddings), index=text_df.index, columns=cols)
-
-		return X_embed
+	def vectorize_text(cls, text):
+		return cls.embed(text)
 
 
 	@classmethod
-	def make_predictions_df(cls, bill_df, predictions_list, bill_type='new'):
-		bill_df_features = ['bioname', 'party']
-		if bill_type == 'old':
-			bill_df_features.append('cast_code')
-		subset_df = bill_df[bill_df_features].copy()
+	def make_predictions_df(cls, bill_df, predictions_list):
+		app_cols = ['bioname', 'party', 'nominate_dim1',
+                    'predict_proba', 'predict_cast']
 
-		pred_df = pd.DataFrame(predictions_list, index=subset_df.index, columns=['predict_proba'])
+		# bill_df_features = ['bioname', 'party']
 
-		pred_df['predict_cast'] = pred_df['predict_proba'].apply(lambda x: 'yea' if round(x) == 1 else 'nay')
+		# subset_df = bill_df.copy()
 
-		return subset_df.join(pred_df)
+		pred_df = pd.DataFrame(predictions_list, index=bill_df.index, columns=['predict_proba'])
+
+		pred_df['predict_cast'] = pred_df['predict_proba'].apply(lambda x: 'yea' if x > .9 else 'nay')
+
+		full_pred_df = bill_df.join(pred_df)
+
+		return full_pred_df[app_cols]
 
 
 	@classmethod
-	def make_new_bill_df(cls, bill_sum, sponsor_party, num_co_D, num_co_R, num_co_I, senator_df):
+	def make_new_bill_df(cls, bill_sum, sponsor_party, num_co_D, num_co_R, num_co_ID, senator_df):
 		new_df = senator_df.copy()
 		new_df['summary'] = bill_sum
-		new_df['sponsor_party'] == sponsor_party
-		new_df['cosponsors'] = num_co_D + num_co_R + num_co_I
+		new_df['sponsor_party'] = sponsor_party
+		new_df['cosponsors'] = num_co_D + num_co_R + num_co_ID
 		new_df['cosponsors_D'] = num_co_D
 		new_df['cosponsors_R'] = num_co_R
-		new_df['cosponsors_ID'] = num_co_I
+		new_df['cosponsors_ID'] = num_co_ID
 
 		new_df['cosponsors^2'] = new_df['cosponsors']**2
 
@@ -93,11 +89,15 @@ class ModelHandler:
 															   if x['lead_party'] == 'D'
 															   else x['cosponsor_party_R_%'], axis=1)
 
+		new_df.reset_index(drop=True, inplace=True)
+
 		return new_df
 
 
 	@classmethod
-	def predict(cls, df, bill_type='new'):
+	def predict(cls, bill_sum, sponsor_party, num_co_D, num_co_R, num_co_ID, senator_df):
+		df = cls.make_new_bill_df(bill_sum, sponsor_party, num_co_D, 
+								  num_co_R, num_co_ID, senator_df)
 		X = df[cls.features]
 
 		text_cols = ['summary']
@@ -107,14 +107,26 @@ class ModelHandler:
 		X_sc_df = cls.scale_data(X_non_text)
 
 		for col in text_cols:
-			X_vec = cls.vectorize_text(X[col], col)
-			X_sc_df = X_sc_df.join(X_vec)
+			X_embed = cls.vectorize_text(X[col].unique())
+			X_embed_array = np.asarray(X_embed)[0]
+
+			short_col = col[:3]
+
+			for i in range(X_embed_array.shape[0]):
+				col_name = short_col+'_'+str(i)
+				X_sc_df[col_name] = X_embed_array[i]
+
+			# vec_cols = [short_col+'_'+str(i) for i in range(np.shape(X_embed)[1])]
+
+			# X_vec_df = pd.DataFrame(np.asarray(X_embed), index=X.index, columns=cols)
+
+			# X_sc_df = X_sc_df.join(X_vec_df)
 
 
 		predictions_xgb = cls.model.predict_proba(X_sc_df)
 		predictions_xgb = [item[1] for item in predictions_xgb]
 
-		predictions_df = cls.make_predictions_df(df, predictions_xgb, bill_type)
+		predictions_df = cls.make_predictions_df(df, predictions_xgb)
 
 		return predictions_df
 
