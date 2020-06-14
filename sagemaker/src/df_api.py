@@ -4,7 +4,7 @@ import joblib
 
 class DataframeHandler:
     def __init__(self):
-        self.path = 'pred_xgb_df.sav'
+        self.path = os.path.join(os.path.abspath(os.getenv('XGB_MODEL_PATH')), 'pred_xgb_df.sav')
         # self.df = joblib.load(self.path)
 
 

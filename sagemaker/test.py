@@ -4,16 +4,16 @@ import pandas as pd
 import requests
 import os
 
-from web_app.df_api import DataframeHandler
+from src.df_api import DataframeHandler
 
 session = boto3.Session(profile_name='jeremy_sagemaker')
 client = session.client('sagemaker-runtime')
 
 custom_attributes = ''
-endpoint_name = "senator_nlp_vote_prediction"               # Endpoint name.
-content_type = "application/json"                           # The MIME type of the input data in the request body.
-accept = "application/json"                                 # The desired MIME type of the inference in the response.
-payload = "..."                                             # Payload for inference.
+endpoint_name = "senator_nlp_vote_prediction"  # Endpoint name.
+content_type = "application/json"              # The MIME type of the input data in the request body.
+accept = "application/json"                    # The desired MIME type of the inference in the response.
+payload = "..."                                # Payload for inference.
 
 
 
