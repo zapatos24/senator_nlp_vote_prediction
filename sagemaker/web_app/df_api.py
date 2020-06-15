@@ -10,7 +10,7 @@ class DataframeHandler:
 
     @classmethod
     def congress_subset(cls, congress):
-        return cls.df[cls.df[congress] == congress]
+        return cls.df[cls.df['congress'] == congress]
 
 
     @classmethod
@@ -47,7 +47,7 @@ class DataframeHandler:
             print("Please no more than 2 columns")
             return
 
-        
+
         if len(col_names) == 0:
             return df[unique_col].unique()
 

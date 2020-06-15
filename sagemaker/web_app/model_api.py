@@ -12,10 +12,10 @@ from helperfunc import find_cosponsor_of_my_party, calc_cosponsor_party_percent
 
 
 class ModelHandler:
-	model_path = '../model_artifacts/final_xgb_model.sav'
-	scaler_path = '../model_artifacts/final_xgb_scaler.sav'
-	feature_path = '../model_artifacts/final_xgb_features.sav'
-	embed_path = '../../universal-sentence-encoder_4'
+	model_path = os.path.join(os.path.abspath(os.getenv('XGB_MODEL_PATH')), 'final_xgb_model.sav')
+	scaler_path = os.path.join(os.path.abspath(os.getenv('XGB_MODEL_PATH')), 'final_xgb_scaler.sav')
+	feature_path = os.path.join(os.path.abspath(os.getenv('XGB_MODEL_PATH')), 'final_xgb_features.sav')
+	embed_path = os.path.abspath(os.getenv('TFHUB_CACHE_DIR'))
 
 	model = joblib.load(model_path)
 	scaler = joblib.load(scaler_path)
@@ -39,6 +39,10 @@ class ModelHandler:
 
 	@classmethod
 	def vectorize_text(cls, text):
+		print()
+		print('vectorize_text text:', text)
+		print(np.shape(text))
+		print()
 		return cls.embed(text)
 
 
@@ -47,12 +51,7 @@ class ModelHandler:
 		app_cols = ['bioname', 'party', 'nominate_dim1',
                     'predict_proba', 'predict_cast']
 
-		# bill_df_features = ['bioname', 'party']
-
-		# subset_df = bill_df.copy()
-
 		pred_df = pd.DataFrame(predictions_list, index=bill_df.index, columns=['predict_proba'])
-
 		pred_df['predict_cast'] = pred_df['predict_proba'].apply(lambda x: 'yea' if x > .9 else 'nay')
 
 		full_pred_df = bill_df.join(pred_df)
@@ -107,6 +106,9 @@ class ModelHandler:
 		X_sc_df = cls.scale_data(X_non_text)
 
 		for col in text_cols:
+			print()
+			print('X_col unique:', X[col].unique())
+			print()
 			X_embed = cls.vectorize_text(X[col].unique())
 			X_embed_array = np.asarray(X_embed)[0]
 
@@ -115,12 +117,6 @@ class ModelHandler:
 			for i in range(X_embed_array.shape[0]):
 				col_name = short_col+'_'+str(i)
 				X_sc_df[col_name] = X_embed_array[i]
-
-			# vec_cols = [short_col+'_'+str(i) for i in range(np.shape(X_embed)[1])]
-
-			# X_vec_df = pd.DataFrame(np.asarray(X_embed), index=X.index, columns=cols)
-
-			# X_sc_df = X_sc_df.join(X_vec_df)
 
 
 		predictions_xgb = cls.model.predict_proba(X_sc_df)
