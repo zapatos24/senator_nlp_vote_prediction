@@ -39,6 +39,10 @@ class ModelHandler:
 
 	@classmethod
 	def vectorize_text(cls, text):
+		print()
+		print('vectorize_text text:', text)
+		print(np.shape(text))
+		print()
 		return cls.embed(text)
 
 
@@ -99,12 +103,12 @@ class ModelHandler:
 
 		X_non_text = X[[x for x in cls.features if x not in text_cols]]
 
-		print('model_api non text:')
-		print(X_non_text)
-
 		X_sc_df = cls.scale_data(X_non_text)
 
 		for col in text_cols:
+			print()
+			print('X_col unique:', X[col].unique())
+			print()
 			X_embed = cls.vectorize_text(X[col].unique())
 			X_embed_array = np.asarray(X_embed)[0]
 
@@ -113,12 +117,6 @@ class ModelHandler:
 			for i in range(X_embed_array.shape[0]):
 				col_name = short_col+'_'+str(i)
 				X_sc_df[col_name] = X_embed_array[i]
-
-			# vec_cols = [short_col+'_'+str(i) for i in range(np.shape(X_embed)[1])]
-
-			# X_vec_df = pd.DataFrame(np.asarray(X_embed), index=X.index, columns=cols)
-
-			# X_sc_df = X_sc_df.join(X_vec_df)
 
 
 		predictions_xgb = cls.model.predict_proba(X_sc_df)

@@ -35,27 +35,12 @@ def score():
     data = None
     result = {}
 
-    # print(flask.request.data)
-    # print()
-    # print(flask.request.json)
-    # print()
-
     if flask.request.content_type == 'application/json':
         data = flask.request.data.decode('utf-8')
-        # print(data)
     else:
         return flask.Response(response="This scoring model only supports json requests",
                               status=415, mimetype='application/json')
     req = json.loads(data)
-    # req = json.loads(json.loads(flask.request.data))
-
-    # print('Type:')
-    # print(type(req))
-    print('Data')
-    print(data)
-    print()
-    print('Dataframe in req:')
-    print(req['dataframe'])
 
     result = {
         'name': 'senator-nlp-vote-prediction',
@@ -66,6 +51,6 @@ def score():
                                            int(req['num_co_ID']),
                                            pd.read_json(req['dataframe'])).to_json()
     }
-    result_string = json.dumps(result)
+    # result_string = json.dumps(result)
 
-    return flask.Response(response=result_string, status=200, mimetype='application/json')
+    return flask.Response(response=result, status=200, mimetype='application/json')
