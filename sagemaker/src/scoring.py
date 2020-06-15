@@ -35,19 +35,27 @@ def score():
     data = None
     result = {}
 
+    # print(flask.request.data)
+    # print()
+    # print(flask.request.json)
+    # print()
+
     if flask.request.content_type == 'application/json':
         data = flask.request.data.decode('utf-8')
+        # print(data)
     else:
         return flask.Response(response="This scoring model only supports json requests",
                               status=415, mimetype='application/json')
     req = json.loads(data)
+    # req = json.loads(json.loads(flask.request.data))
 
-    # df = ModelHandler.make_new_bill_df(req['summary'],
-    #                                    req['sponsor_party'],
-    #                                    int(req['num_co_D']),
-    #                                    int(req['num_co_R']),
-    #                                    int(req['num_co_ID']),
-    #                                    pd.read_json(req['dataframe']))
+    # print('Type:')
+    # print(type(req))
+    print('Data')
+    print(data)
+    print()
+    print('Dataframe in req:')
+    print(req['dataframe'])
 
     result = {
         'name': 'senator-nlp-vote-prediction',

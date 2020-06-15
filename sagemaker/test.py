@@ -72,13 +72,13 @@ test_item = {
     "num_co_R": 0,
     "num_co_ID": 0,
 }
-
+print('Type test_item:', type(test_item))
 
 
 TEST_SERVER = False #os.getenv('TEST_SERVER', True)
 
 if TEST_SERVER:
-    print(score(json.dumps(test_item)))
+    print(score(test_item))
 else:
-    print(score_local(json.dumps(test_item)))
+    print(score_local(test_item))
 

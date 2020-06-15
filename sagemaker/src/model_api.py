@@ -99,6 +99,9 @@ class ModelHandler:
 
 		X_non_text = X[[x for x in cls.features if x not in text_cols]]
 
+		print('model_api non text:')
+		print(X_non_text)
+
 		X_sc_df = cls.scale_data(X_non_text)
 
 		for col in text_cols:

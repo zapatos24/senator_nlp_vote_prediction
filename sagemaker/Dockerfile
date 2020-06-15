@@ -4,7 +4,9 @@ FROM tensorflow/tensorflow:1.15.0-py3
 RUN pip3 --no-cache-dir install \
     argparse pydash \
     numpy pandas \
-    sklearn xgboost tensorflow_hub \
+    sklearn \
+    scikit-learn==0.22.1 \
+    xgboost tensorflow_hub \
     boto3 awscli \
     gevent flask
 
