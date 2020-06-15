@@ -1,8 +1,15 @@
 import streamlit as st
 import plotly_express as px
 import pandas as pd
+import boto3
+import json
+import requests
+import os
+import joblib
+
 from df_api import DataframeHandler
 from model_api import ModelHandler
+
 
 def new_bill_search():
     df = DataframeHandler()
@@ -22,10 +29,10 @@ def new_bill_search():
     st.write('**Bill Number**: Test Bill')
     st.write('**Bill Summary**: ', bill_summary)
     st.write('**Sponsor Party**: ', sponsor_party)
-    st.write('**Democrat Cosponsors**: ', num_cospon_D)
-    st.write('**Republican Cosponsors**: ', num_cospon_R)
-    st.write('**Independent Cosponsors**: ', num_cospon_I)
-    st.write('**Total Cosponsors**: ', num_cospon_tot)
+    st.write('**Democrat Cosponsors**: ', num_co_D)
+    st.write('**Republican Cosponsors**: ', num_co_R)
+    st.write('**Independent Cosponsors**: ', num_co_ID)
+    st.write('**Total Cosponsors**: ', num_co_tot)
 
 
     #set button to send to model
@@ -33,34 +40,50 @@ def new_bill_search():
     stop = st.sidebar.button('Reset')
 
     if start:
-        # cong_senators = df.get_senator_info(116)
 
-        import sys
-        print(sys.getsizeof(cong_senators))
+        session = boto3.Session(profile_name='jeremy_sagemaker')
+        client = session.client('sagemaker-runtime')
 
-        # req = {
-        #     "dataframe": cong_senators.to_json(),
-        #     "summary": "This bill allows a crowdfunding issuer to sell shares through a crowdfunding vehicle. (Crowdfunding is a method of capital formation in which groups of people pool money to invest in a company or to support an effort to accomplish a specific goal.)",
-        #     "sponsor_party": "R",
-        #     "num_co_D": 1,
-        #     "num_co_R": 0,
-        #     "num_co_ID": 0,
-        # }
+        custom_attributes = ''
+        endpoint_name = "senator_nlp_vote_prediction"  # Endpoint name.
+        content_type = "application/json"              # The MIME type of the input data in the request body.
+        accept = "application/json"                    # The desired MIME type of the inference in the response.
+        payload = "..."                                # Payload for inference.
 
-        # pred_df = ModelHandler.predict(req['summary'],
-        #                                req['sponsor_party'],
-        #                                int(req['num_co_D']),
-        #                                int(req['num_co_R']),
-        #                                int(req['num_co_ID']),
-        #                                pd.read_json(req['dataframe']))
 
-        pred_df = ModelHandler.predict(bill_summary,
-                                       sponsor_party,
-                                       num_co_D,
-                                       num_co_R,
-                                       num_co_ID,
-                                       cong_senators)
 
+        def score(text):
+            return client.invoke_endpoint(
+                EndpointName=endpoint_name,
+                CustomAttributes=custom_attributes,
+                ContentType=content_type,
+                Accept=accept,
+                Body=text
+                )['Body'].read().decode('utf-8')
+
+
+        def score_local(text):
+            return requests.post('http://localhost:8080/invocations', json=text).content
+
+
+        pred_item = {
+            "dataframe": cong_senators.to_json(),
+            "summary": bill_summary,
+            "sponsor_party": sponsor_party,
+            "num_co_D": num_co_D,
+            "num_co_R": num_co_R,
+            "num_co_ID": num_co_ID,
+        }
+
+
+        TEST_SERVER = True #os.getenv('TEST_SERVER', True)
+
+        if TEST_SERVER:
+            response = score(test_item)
+        else:
+            response = score_local(test_item)
+
+        pred_df = pd.read_json(response['score_data'])
 
         def pass_or_not(df, column):
             if sum(df[column] == 'yea') > 50:
