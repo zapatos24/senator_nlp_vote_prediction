@@ -72,10 +72,9 @@ test_item = {
     "num_co_R": 0,
     "num_co_ID": 0,
 }
-print('Type test_item:', type(test_item))
 
 
-TEST_SERVER = False #os.getenv('TEST_SERVER', True)
+TEST_SERVER = True #os.getenv('TEST_SERVER', True)
 
 if TEST_SERVER:
     print(score(test_item))
