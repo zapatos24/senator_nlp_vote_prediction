@@ -3,8 +3,9 @@ import json
 import pandas as pd
 import requests
 import os
+import joblib
 
-from src.df_api import DataframeHandler
+# from src.df_api import DataframeHandler
 
 session = boto3.Session(profile_name='jeremy_sagemaker')
 client = session.client('sagemaker-runtime')
@@ -37,8 +38,28 @@ def score_local(text):
     return requests.post('http://localhost:8080/invocations', json=text).content
 
 
-df = DataframeHandler()
-cong_senators = df.get_senator_info(116)
+path = 'model_artifacts/pred_xgb_df.sav'
+df = joblib.load(path)
+
+
+def congress_subset(df, congress):
+    return df[df['congress'] == congress]
+
+
+def get_senator_info(df, congress, df_size='small'):
+    cong_df = congress_subset(df, congress)
+    senator_df = cong_df.drop_duplicates(subset='bioname', keep='last')
+    if df_size == 'small':
+        short_cols = ['bioname', 'party', 'lead_party', 'nominate_dim1', 
+                      'nominate_dim2', 'age', 'tenure', 
+                      'percent_campaign_vote', 'party_R']
+
+        return senator_df[short_cols]
+
+    else:
+        return senator_df
+
+cong_senators = get_senator_info(df, 116)
 
 import sys
 print(sys.getsizeof(cong_senators))

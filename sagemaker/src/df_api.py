@@ -3,31 +3,29 @@ import os
 import joblib
 
 class DataframeHandler:
-    def __init__(self):
-        self.path = os.path.join(os.path.abspath(os.getenv('XGB_MODEL_PATH')), 'pred_xgb_df.sav')
-        # self.df = joblib.load(self.path)
+    path = os.path.join(os.path.abspath(os.getenv('XGB_MODEL_PATH')), 'pred_xgb_df.sav')
+    # path = '../model_artifacts/pred_xgb_df.sav'
+    df = joblib.load(path)
 
 
-    def congress_subset(self, congress):
-        df = joblib.load(self.path)
-        cong_df = df[df.congress == congress]
-
-        return cong_df
+    @classmethod
+    def congress_subset(cls, congress):
+        return cls.df[cls.df['congress'] == congress]
 
 
-    def bill_subset(self, bill_num, subset_df=[]):
+    @classmethod
+    def bill_subset(cls, bill_num, subset_df=[]):
         if type(subset_df) == 'list':
-            df = subset_df
+            bill_df = subset_df
         else:
-            df = joblib.load(self.path)
+            bill_df = cls.df.copy()
 
-        bill_df = df[df.bill_number == bill_num]
-
-        return bill_df
+        return bill_df[bill_df.bill_number == bill_num]
 
 
-    def get_senator_info(self, congress, df_size='small'):
-        cong_df = self.congress_subset(congress)
+    @classmethod
+    def get_senator_info(cls, congress, df_size='small'):
+        cong_df = cls.congress_subset(congress)
         senator_df = cong_df.drop_duplicates(subset='bioname', keep='last')
         if df_size == 'small':
             short_cols = ['bioname', 'party', 'lead_party', 'nominate_dim1', 
@@ -39,7 +37,8 @@ class DataframeHandler:
             return senator_df
 
 
-    def get_unique_values(self, col_names=[], col_values=[], unique_col=''):
+    @classmethod
+    def get_unique_values(cls, col_names=[], col_values=[], unique_col=''):
         if len(col_names) != len(col_values):
             print('Need values for all columns passed')
             return
@@ -48,7 +47,6 @@ class DataframeHandler:
             print("Please no more than 2 columns")
             return
 
-        df = joblib.load(self.path)
 
         if len(col_names) == 0:
             return df[unique_col].unique()
@@ -66,9 +64,9 @@ class DataframeHandler:
         return
 
 
-    def get_vote_breakdown(self, congress, bill_num):
-        cong_df = self.congress_subset(congress)
-        bill_df = self.bill_subset(bill_num, cong_df)
+    @classmethod
+    def get_vote_breakdown(cls, congress, bill_num):
+        bill_df = cls.bill_subset(bill_num, cls.congress_subset(congress))
 
         app_cols = ['bioname', 'party', 'nominate_dim1', 'cast_code', 
                     'predict_proba', 'predict_cast']

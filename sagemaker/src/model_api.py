@@ -47,12 +47,7 @@ class ModelHandler:
 		app_cols = ['bioname', 'party', 'nominate_dim1',
                     'predict_proba', 'predict_cast']
 
-		# bill_df_features = ['bioname', 'party']
-
-		# subset_df = bill_df.copy()
-
 		pred_df = pd.DataFrame(predictions_list, index=bill_df.index, columns=['predict_proba'])
-
 		pred_df['predict_cast'] = pred_df['predict_proba'].apply(lambda x: 'yea' if x > .9 else 'nay')
 
 		full_pred_df = bill_df.join(pred_df)
