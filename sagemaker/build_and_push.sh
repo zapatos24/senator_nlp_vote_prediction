@@ -2,7 +2,7 @@
 # to execute: call make build_and_push from root dir
 
 # The name of our algorithm
-algorithm_name=models/senator-nlp-vote-prediction
+algorithm_name=models/senator-nlp-vote-prediction-2
 profile=jeremy_sagemaker
 
 

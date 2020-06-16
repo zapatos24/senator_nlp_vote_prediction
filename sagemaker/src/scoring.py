@@ -51,6 +51,6 @@ def score():
                                            int(req['num_co_ID']),
                                            pd.read_json(req['dataframe'])).to_json()
     }
-    # result_string = json.dumps(result)
+    result_string = json.dumps(result)
 
-    return flask.Response(response=result, status=200, mimetype='application/json')
+    return flask.Response(response=result_string, status=200, mimetype='application/json')

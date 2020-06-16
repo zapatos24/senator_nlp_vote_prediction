@@ -3,6 +3,7 @@ import numpy as np
 import joblib
 import os
 import xgboost as xgb
+os.environ["CUDA_VISIBLE_DEVICES"]="-1"
 import tensorflow as tf
 import tensorflow_hub as hub
 from sklearn.preprocessing import StandardScaler

@@ -5,13 +5,11 @@ import requests
 import os
 import joblib
 
-# from src.df_api import DataframeHandler
-
 session = boto3.Session(profile_name='jeremy_sagemaker')
 client = session.client('sagemaker-runtime')
 
 custom_attributes = ''
-endpoint_name = "senator_nlp_vote_prediction"  # Endpoint name.
+endpoint_name = "senator-nlp-vote-prediction-2"  # Endpoint name.
 content_type = "application/json"              # The MIME type of the input data in the request body.
 accept = "application/json"                    # The desired MIME type of the inference in the response.
 payload = "..."                                # Payload for inference.
@@ -20,20 +18,16 @@ payload = "..."                                # Payload for inference.
 
 def score(text):
 
-    # from model_api import ModelHandler
-
     return client.invoke_endpoint(
-        EndpointName=endpoint_name,
-        CustomAttributes=custom_attributes,
-        ContentType=content_type,
-        Accept=accept,
-        Body=text
-        )['Body'].read().decode('utf-8')
+            EndpointName=endpoint_name,
+            CustomAttributes=custom_attributes,
+            ContentType=content_type,
+            Accept=accept,
+            Body=text
+            )['Body'].read().decode('utf-8')
 
 
 def score_local(text):
-
-    # from model_api import ModelHandler
 
     return requests.post('http://localhost:8080/invocations', json=text).content
 
@@ -77,7 +71,7 @@ test_item = {
 TEST_SERVER = True #os.getenv('TEST_SERVER', True)
 
 if TEST_SERVER:
-    print(score(test_item))
+    print(score(json.dumps(test_item)))
 else:
     print(score_local(test_item))
 
