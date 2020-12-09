@@ -2,7 +2,7 @@
 # to execute: call make build_and_push from root dir
 
 # The name of our algorithm
-algorithm_name=models/senator-nlp-vote-prediction
+algorithm_name=models/senator-nlp-vote-prediction-2
 profile=jeremy_sagemaker
 
 
@@ -25,7 +25,7 @@ then
 fi
 
 # Get the login command from ECR and execute it directly
-$(aws ecr get-login --region ${region} --no-include-email --profile ${profile})
+aws ecr get-login-password --region ${region} --profile ${profile} | docker login --username AWS --password-stdin ${fullname}
 
 
 export AWS_ACCESS_KEY_ID=$(aws --profile "${profile}" configure get aws_access_key_id)

@@ -3,6 +3,10 @@ streamlit
 pandas
 joblib
 plotly_express
+awscli
+boto3
+json
+requests
 gunicorn
 fastapi
 grpcio-tools

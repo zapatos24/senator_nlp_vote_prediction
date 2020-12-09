@@ -7,16 +7,20 @@ from df_api import DataframeHandler
 def old_bill_search():
     df = DataframeHandler()
 
-    congress = st.sidebar.selectbox('Congress?', df.get_unique_values('congress', df.df))
-    cong_subset = df.congress_subset(congress)
+    congress = st.sidebar.selectbox('Congress?', 
+                                    df.get_unique_values(unique_col='congress'))
 
     st.write('**Congress**: ', congress)
 
     bill_num = st.sidebar.selectbox('Bill number?', 
+                                    df.get_unique_values(col_names=['congress'],
+                                                         col_values=[congress], 
+                                                         unique_col='bill_number'))
+
                                     df.get_unique_values(col_name='bill_number',
                                                          subset_df=cong_subset))
 
-    bill_subset = df.bill_subset(bill_num, cong_subset)
+    # bill_subset = df.bill_subset(bill_num, cong_subset)
 
     st.write('**Bill Number**: ', bill_num)
 
@@ -25,21 +29,22 @@ def old_bill_search():
     stop = st.sidebar.button('Reset')
 
     if start:
+        pred_df = df.get_vote_breakdown(congress, bill_num)
         def pass_or_not(df, column):
-            if sum(bill_subset[column] == 1) > 50:
+            if sum(df[column] == 1) > 50:
                 return "Pass"
-            elif sum(bill_subset[column] == 0) > 50:
+            elif sum(df[column] == 0) > 50:
                 return "Fail"
             else:
                 return "Uncertain"
 
-        st.write('**Pass or Fail Actual**: ', pass_or_not(bill_subset, 'cast_code'), '  \n \
-                  **Yea votes**: ', str(sum(bill_subset['cast_code'] == 1)), '  \n \
-                  **Nay votes**: ', str(sum(bill_subset['cast_code'] == 0)))
+        st.write('**Pass or Fail Actual**: ', pass_or_not(pred_df, 'cast_code'), '  \n \
+                  **Yea votes**: ', str(sum(pred_df['cast_code'] == 1)), '  \n \
+                  **Nay votes**: ', str(sum(pred_df['cast_code'] == 0)))
 
-        st.write('**Pass or Fail Predicted**: ', pass_or_not(bill_subset, 'predict_cast'), '  \n \
-                  **Yea votes**: ', str(sum(bill_subset['predict_cast'] == 1)), '  \n \
-                  **Nay votes**: ', str(sum(bill_subset['predict_cast'] == 0)))
+        st.write('**Pass or Fail Predicted**: ', pass_or_not(pred_df, 'predict_cast'), '  \n \
+                  **Yea votes**: ', str(sum(pred_df['predict_cast'] == 1)), '  \n \
+                  **Nay votes**: ', str(sum(pred_df['predict_cast'] == 0)))
 
         st.markdown("Below you can see a distribution of senators' DW-NOMINATE score  \
                      against the model's predicted probability that the senator will vote 'yea'  \
@@ -56,6 +61,8 @@ def old_bill_search():
 
         st.markdown('### Distribution of predicted votes and dw_nominate score.')
 
+        fig = px.scatter(pred_df, 
+                         x ='nominate_dim1', y='predict_proba', 
         fig = px.scatter(bill_subset, 
                          x='nominate_dim1', y='predict_proba',
                          color='party', 
@@ -77,4 +84,5 @@ def old_bill_search():
 
         st.markdown('### The full breakdown of votes')
 
+        st.write(pred_df.sort_values(['party', 'predict_proba'], ascending=False))
         st.write(df.get_vote_breakdown(bill_subset).sort_values(['party', 'predict_proba'], ascending=False))

@@ -1,42 +1,75 @@
 import pandas as pd
+import os
 import joblib
 
 class DataframeHandler:
-    def __init__(self):
-        self.path = 'pred_xgb_df.sav'
-        self.df = joblib.load(self.path)
+    # path = os.path.join(os.path.abspath(os.getenv('XGB_MODEL_PATH')), 'pred_xgb_df.sav')
+    path = '../model_artifacts/pred_xgb_df.sav'
+    df = joblib.load(path)
 
 
-    def congress_subset(self, congress):
-        cong_df = self.df[self.df.congress == congress]
-
-        return cong_df
-
-
-    def bill_subset(self, bill_num, subset_df):
-        bill_df = subset_df[subset_df.bill_number == bill_num]
-
-        return bill_df
+    @classmethod
+    def congress_subset(cls, congress):
+        return cls.df[cls.df['congress'] == congress]
 
 
-    def unique_subset(self, unique_col, subset_df, cols_to_return=[]):
-        # unique_vals = subset_df[unique_col].unique()
-        new_df = subset_df.drop_duplicates(subset=unique_col, keep='last')
-
-        if cols_to_return:
-            try:
-                return new_df[cols_to_return]
-            except:
-                print('One of cols not in dataframe.')
+    @classmethod
+    def bill_subset(cls, bill_num, subset_df=[]):
+        if type(subset_df) == 'list':
+            bill_df = subset_df
         else:
-            return new_df
+            bill_df = cls.df.copy()
+
+        return bill_df[bill_df.bill_number == bill_num]
 
 
-    def get_unique_values(self, col_name, subset_df):
-        return subset_df[col_name].unique()
+    @classmethod
+    def get_senator_info(cls, congress, df_size='small'):
+        cong_df = cls.congress_subset(congress)
+        senator_df = cong_df.drop_duplicates(subset='bioname', keep='last')
+        if df_size == 'small':
+            short_cols = ['bioname', 'party', 'lead_party', 'nominate_dim1', 
+                          'nominate_dim2', 'age', 'tenure', 
+                          'percent_campaign_vote', 'party_R']
+            return senator_df[short_cols]
+
+        else:
+            return senator_df
 
 
-    def get_vote_breakdown(self, subset_df):
-        app_cols = ['bioname', 'party', 'predict_proba', 'cast_code', 'predict_cast']
-        return subset_df[app_cols]
+    @classmethod
+    def get_unique_values(cls, col_names=[], col_values=[], unique_col=''):
+        if len(col_names) != len(col_values):
+            print('Need values for all columns passed')
+            return
+
+        if len(col_names) > 2:
+            print("Please no more than 2 columns")
+            return
+
+
+        if len(col_names) == 0:
+            return df[unique_col].unique()
+
+        if len(col_names) == 1:
+            slice_df = df[df[col_names[0]] == col_values[0]]
+            return slice_df[unique_col].unique()
+
+        if len(col_names) == 2:
+            slice_df = df[(df[col_names[0]] == col_values[0]) & 
+                          (df[col_names[1]] == col_values[1])]
+            return slice_df[unique_col].unique()
+
+        print('Something went wrong')
+        return
+
+
+    @classmethod
+    def get_vote_breakdown(cls, congress, bill_num):
+        bill_df = cls.bill_subset(bill_num, cls.congress_subset(congress))
+
+        app_cols = ['bioname', 'party', 'nominate_dim1', 'cast_code', 
+                    'predict_proba', 'predict_cast']
+
+        return bill_df[app_cols]
 
