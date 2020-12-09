@@ -1,8 +1,8 @@
 import streamlit as st
 import plotly_express as px
-
 from df_api import DataframeHandler
 # from model_api import ModelHandler
+
 
 def old_bill_search():
     df = DataframeHandler()
@@ -17,12 +17,14 @@ def old_bill_search():
                                                          col_values=[congress], 
                                                          unique_col='bill_number'))
 
+                                    df.get_unique_values(col_name='bill_number',
+                                                         subset_df=cong_subset))
 
     # bill_subset = df.bill_subset(bill_num, cong_subset)
 
     st.write('**Bill Number**: ', bill_num)
 
-    #set button to send to model
+    # set button to send to model
     start = st.sidebar.button('Bill Look Up')
     stop = st.sidebar.button('Reset')
 
@@ -44,7 +46,6 @@ def old_bill_search():
                   **Yea votes**: ', str(sum(pred_df['predict_cast'] == 1)), '  \n \
                   **Nay votes**: ', str(sum(pred_df['predict_cast'] == 0)))
 
-
         st.markdown("Below you can see a distribution of senators' DW-NOMINATE score  \
                      against the model's predicted probability that the senator will vote 'yea'  \
                      on the bill.")
@@ -62,17 +63,19 @@ def old_bill_search():
 
         fig = px.scatter(pred_df, 
                          x ='nominate_dim1', y='predict_proba', 
+        fig = px.scatter(bill_subset, 
+                         x='nominate_dim1', y='predict_proba',
                          color='party', 
                          hover_name='bioname',
                          hover_data={'nominate_dim1': False, 
                                      'party': False, 
                                      'predict_proba': ':.3f'},
-                         color_discrete_map={'D':'blue', 
-                                             'R':'red', 
-                                             'I':'lightgreen'}
-                        )
+                         color_discrete_map={'D': 'blue',
+                                             'R': 'red',
+                                             'I': 'lightgreen'}
+                         )
 
-        #labels={'nominate_dim1': 'DW Nominate Score','predict_proba': 'Probability of Yea Vote'}
+        # labels={'nominate_dim1': 'DW Nominate Score','predict_proba': 'Probability of Yea Vote'}
 
         fig.update_layout(xaxis_title="DW-NOMINATE Score",
                           yaxis_title="Probability of Yea Vote")
@@ -82,4 +85,4 @@ def old_bill_search():
         st.markdown('### The full breakdown of votes')
 
         st.write(pred_df.sort_values(['party', 'predict_proba'], ascending=False))
-
+        st.write(df.get_vote_breakdown(bill_subset).sort_values(['party', 'predict_proba'], ascending=False))
