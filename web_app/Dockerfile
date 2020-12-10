@@ -10,8 +10,8 @@ RUN apt-get update && \
     build-essential \
     gcc
 
-RUN python -m venv /web_app/env
-ENV PATH="/web_app/env/bin:$PATH"
+RUN python -m venv /opt/web_app/env
+ENV PATH="/opt/web_app/env/bin:$PATH"
 
 # copy over requirements
 COPY requirements.txt ./requirements.txt
@@ -22,18 +22,36 @@ RUN pip install -r requirements.txt
 
 #----build image -------------------------------
 FROM base AS build-image
-COPY --from=compile-image /web_app/env /web_app/env
+COPY --from=compile-image opt/web_app/env opt/web_app/env
 
 # exposing default port for streamlit
 EXPOSE 8501
 
 # Make sure we use the virtualenv:
-ENV PATH="/web_app/env/bin:$PATH"
-COPY . /web_app
-WORKDIR /web_app
+ENV PATH="/opt/web_app/env/bin:$PATH"
+COPY . /opt/web_app
+
+#set some environmental variables
+ENV PYTHONUNBUFFERED=TRUE
+ENV PYTHONDONTWRITEBYTECODE=TRUE
+ENV LOG_LEVEL WARNING
+ENV AWS_DEFAULT_REGION us-east-1
+ENV MODEL_S3_BUCKET senator-nlp-vote-prediction
+
+#set path for model artifacts
+ENV XGB_MODEL_S3_LOCATION ${MODEL_S3_BUCKET}/data/
+ENV XGB_MODEL_PATH /opt/ml/senator_model
+
+#set args for aws login
+ARG AWS_ACCESS_KEY_ID
+ARG AWS_SECRET_ACCESS_KEY
+RUN aws s3 cp s3://$XGB_MODEL_S3_LOCATION $XGB_MODEL_PATH --recursive
 
 # cmd to launch app when container is run
 CMD streamlit run main.py
+
+#set working directory
+WORKDIR /opt/web_app
 
 # streamlit-specific commands for config
 ENV LC_ALL=C.UTF-8

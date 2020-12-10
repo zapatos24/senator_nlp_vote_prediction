@@ -3,8 +3,8 @@ import os
 import joblib
 
 class DataframeHandler:
-    # path = os.path.join(os.path.abspath(os.getenv('XGB_MODEL_PATH')), 'pred_xgb_df.sav')
-    path = '../model_artifacts/pred_xgb_df.sav'
+    path = os.path.join(os.path.abspath(os.getenv('XGB_MODEL_PATH')), 'pred_xgb_df.sav')
+    # path = '../model_artifacts/pred_xgb_df.sav'
     df = joblib.load(path)
 
 
