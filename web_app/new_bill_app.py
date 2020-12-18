@@ -40,7 +40,6 @@ def new_bill_search():
     stop = st.sidebar.button('Reset')
 
     if start:
-
         session = boto3.Session(profile_name='jeremy_sagemaker')
         client = session.client('sagemaker-runtime')
 
@@ -66,24 +65,37 @@ def new_bill_search():
             return requests.post('http://localhost:8080/invocations', json=text).content
 
 
-        pred_item = {
-            "dataframe": cong_senators.to_json(),
-            "summary": bill_summary,
-            "sponsor_party": sponsor_party,
-            "num_co_D": num_co_D,
-            "num_co_R": num_co_R,
-            "num_co_ID": num_co_ID,
-        }
+        pred_item = {"dataframe": cong_senators.to_json(),
+                     "summary": bill_summary,
+                     "sponsor_party": sponsor_party,
+                     "num_co_D": num_co_D,
+                     "num_co_R": num_co_R,
+                     "num_co_ID": num_co_ID}
+
+
+        test_item = {"dataframe": cong_senators.to_json(),
+                     "summary": "This bill allows a crowdfunding issuer to sell shares through a crowdfunding vehicle. (Crowdfunding is a method of capital formation in which groups of people pool money to invest in a company or to support an effort to accomplish a specific goal.)",
+                     "sponsor_party": "R",
+                     "num_co_D": 1,
+                     "num_co_R": 0,
+                     "num_co_ID": 0}
 
 
         TEST_SERVER = True #os.getenv('TEST_SERVER', True)
+        TEST_ITEM = True
 
         if TEST_SERVER:
-            response = score(test_item)
+            if TEST_ITEM:
+                response = score(test_item)
+            else:
+                response = score(pred_item)
         else:
-            response = score_local(test_item)
+            if TEST_ITEM:
+                response = score_local(test_item)
+            else:
+                response = score_local(pred_item)
 
-        pred_df = pd.read_json(response['score_data'])
+        pred_df = pd.read_json(json.loads(response['score_data']))
 
         def pass_or_not(df, column):
             if sum(df[column] == 'yea') > 50:
