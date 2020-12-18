@@ -68,7 +68,7 @@ test_item = {
 }
 
 
-TEST_SERVER = True #os.getenv('TEST_SERVER', True)
+TEST_SERVER = False #os.getenv('TEST_SERVER', True)
 
 if TEST_SERVER:
     print(score(json.dumps(test_item)))
