@@ -29,10 +29,10 @@ def new_bill_search():
     st.write('**Bill Number**: Test Bill')
     st.write('**Bill Summary**: ', bill_summary)
     st.write('**Sponsor Party**: ', sponsor_party)
-    st.write('**Democrat Cosponsors**: ', num_co_D)
-    st.write('**Republican Cosponsors**: ', num_co_R)
-    st.write('**Independent Cosponsors**: ', num_co_ID)
-    st.write('**Total Cosponsors**: ', num_co_tot)
+    st.write('**Democrat Cosponsors**: ', num_cospon_D)
+    st.write('**Republican Cosponsors**: ', num_cospon_R)
+    st.write('**Independent Cosponsors**: ', num_cospon_I)
+    st.write('**Total Cosponsors**: ', num_cospon_tot)
 
 
     #set button to send to model
@@ -44,7 +44,7 @@ def new_bill_search():
         client = session.client('sagemaker-runtime')
 
         custom_attributes = ''
-        endpoint_name = "senator_nlp_vote_prediction"  # Endpoint name.
+        endpoint_name = "senator-nlp-vote-prediction"  # Endpoint name.
         content_type = "application/json"              # The MIME type of the input data in the request body.
         accept = "application/json"                    # The desired MIME type of the inference in the response.
         payload = "..."                                # Payload for inference.
@@ -65,20 +65,24 @@ def new_bill_search():
             return requests.post('http://localhost:8080/invocations', json=text).content
 
 
-        pred_item = {"dataframe": cong_senators.to_json(),
-                     "summary": bill_summary,
-                     "sponsor_party": sponsor_party,
-                     "num_co_D": num_co_D,
-                     "num_co_R": num_co_R,
-                     "num_co_ID": num_co_ID}
+        pred_item = {
+            "dataframe": cong_senators.to_json(),
+             "summary": bill_summary,
+             "sponsor_party": sponsor_party,
+             "num_co_D": num_cospon_D,
+             "num_co_R": num_cospon_R,
+             "num_co_ID": num_cospon_I
+        }
 
 
-        test_item = {"dataframe": cong_senators.to_json(),
-                     "summary": "This bill allows a crowdfunding issuer to sell shares through a crowdfunding vehicle. (Crowdfunding is a method of capital formation in which groups of people pool money to invest in a company or to support an effort to accomplish a specific goal.)",
-                     "sponsor_party": "R",
-                     "num_co_D": 1,
-                     "num_co_R": 0,
-                     "num_co_ID": 0}
+        test_item = {
+            "dataframe": cong_senators.to_json(),
+             "summary": "This bill allows a crowdfunding issuer to sell shares through a crowdfunding vehicle. (Crowdfunding is a method of capital formation in which groups of people pool money to invest in a company or to support an effort to accomplish a specific goal.)",
+             "sponsor_party": "R",
+             "num_co_D": 1,
+             "num_co_R": 0,
+             "num_co_ID": 0
+        }
 
 
         TEST_SERVER = True #os.getenv('TEST_SERVER', True)

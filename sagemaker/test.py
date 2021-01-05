@@ -4,12 +4,14 @@ import pandas as pd
 import requests
 import os
 import joblib
+from pprint import pprint
+
 
 session = boto3.Session(profile_name='jeremy_sagemaker')
 client = session.client('sagemaker-runtime')
 
 custom_attributes = ''
-endpoint_name = "senator-nlp-vote-prediction-2"  # Endpoint name.
+endpoint_name = "senator-nlp-vote-prediction"  # Endpoint name.
 content_type = "application/json"              # The MIME type of the input data in the request body.
 accept = "application/json"                    # The desired MIME type of the inference in the response.
 payload = "..."                                # Payload for inference.
@@ -29,7 +31,7 @@ def score(text):
 
 def score_local(text):
 
-    return requests.post('http://localhost:8080/invocations', json=text).content
+    return requests.post('http://localhost:8080/invocations', json=text).content.decode('utf-8')
 
 
 path = 'model_artifacts/pred_xgb_df.sav'
@@ -55,8 +57,8 @@ def get_senator_info(df, congress, df_size='small'):
 
 cong_senators = get_senator_info(df, 116)
 
-import sys
-print(sys.getsizeof(cong_senators))
+# import sys
+# print(sys.getsizeof(cong_senators))
 
 test_item = {
     "dataframe": cong_senators.to_json(),
@@ -68,10 +70,10 @@ test_item = {
 }
 
 
-TEST_SERVER = False #os.getenv('TEST_SERVER', True)
+TEST_SERVER = True #os.getenv('TEST_SERVER', True)
 
 if TEST_SERVER:
-    print(score(json.dumps(test_item)))
+    pprint(json.loads(score(json.dumps(test_item))), indent=4)
 else:
-    print(score_local(test_item))
+    pprint(json.loads(score_local(test_item)), indent=4)
 
