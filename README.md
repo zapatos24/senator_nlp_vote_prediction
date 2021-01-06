@@ -31,6 +31,8 @@ voteview rollcalls
 open secrets - future use for bringing in campaign donation info into votes
 was able to create a table of CID, FecCandID, BioguideID, Name CSV for senators that did not yet exist on internet
 
+[fancy_table_df_head.png]
+
 pull all open secrets data, but Remaining ids are for senators who were appointed due to an elected senator's death, 
 or left shortly after winning due to scandal.
 
@@ -146,4 +148,69 @@ No real change, but saved 18 chosen features for use in more advanced model
 
 ## 04 - XGBoost Model
 
+drop all rollcalls except last, and use top 18 features from logit/RF
+
+originally just randomly sampled all data, but later determined that randomly separating out individual bills would
+ensure no information from my training environment leaked into my test environment
+
+[xgb_no_nlp_confusion_report.png]
+
+[code for roc score on xgb no nlp]
+
+slight improvement, but no major change from logit model
+better performance in classifying false values, worse in predicting true values, though an overall improved ROC
+score (7%)
+
+### XGB with NLP
+
+Utilize the Universal Sentence Encoder from google to vectorize bills summaries
+
+Turn the embeddings into df, join back with original bill summaries, join back to main_df, oversample training set
+
+[xgb_nlp_confusion_report.png]
+
+[code for roc score on xgb no nlp]
+
+Incorporation of text appears to improve the F1 score, but slightly decrease the ROC score. Suggests that while the
+model improves at the rounded binary classification of a yea or nea vote, those votes it corrects incorrectly it
+predicts more confidently in the opposite direction.
+
+### Hyperparameter Tuning
+
+The final thing I did with the XGBoost model is some hyperparameter tuning, see what additional shifts we can make 
+to eek out the last of that F1 score. I performed a nested iteration through 'n_estimators', 'max_depth', 'learning_rate', 
+'subsample', 'colsample_bytree', and 'gamma'. 
+
+[code for versions of each hyper iterated through]
+
+I then plotted the f1 score against the roc score and from all those iterations, I visually chose the hyperparameter 
+sets with the highest F1 score, the one with the highest ROC score, and one that was a balance between the two. 
+
+[code block of choosing best hyper parameters]
+
+I then tested each of those hyperparameter sets using the same oversampled, nlp-included train and test sets as before, 
+and chose the one with the highest F1 score, as the ROC was basically the same between all 3 models.
+
+[code for best hyperparameters]
+
+ran with threshold of .6 (instead of .5) for a vote going yea instead of nay, f1 score gets up to random forest levels, 
+with ROC a significant improvement over RF
+
+[xgb_best_hyper_confusion_report.png]
+
+We can see how imbalanced the confusion matrix is though, and in practice, a whip who was using this product would
+assume the votes were there too often, when they actually weren't. So I raised the threshold for a yea vote to .9, and
+the matrix shifts as such
+
+[xgb_best_hyper_9_thres_confusion_report.png]
+
+while it lowers our F1 score slightly, the more balanced classes are better served in the eventual product, though we
+keep the same ROC score as before
+
+## Creating artifacts for the web application
+
+I then run the entire dataframe through the model, and append the predictions from the model onto the main dataframe, 
+for faster retrieval of information in the web app, and save that df as an artifact. I also save the features, scalar, 
+and model as .sav files, which will eventually be hosted on AWS for retrieval when creating a sagemaker docker container 
+for predictions.
 
