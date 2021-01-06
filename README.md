@@ -228,7 +228,7 @@ below.
  'colsample_bytree': 0.9, 
  'gamma': 0, ...}
 F1:  0.8685
-ROC:  0.853
+ROC: 0.853
 
 {'n_estimators': 500, 
  'max_depth': 6, 
@@ -237,7 +237,7 @@ ROC:  0.853
  'colsample_bytree': 0.9, 
  'gamma': 0, ...}
 F1:  0.8655
-ROC:  0.8542
+ROC: 0.8542
 
 {'n_estimators': 1000, 
  'max_depth': 5, 
@@ -246,7 +246,7 @@ ROC:  0.8542
  'colsample_bytree': 0.3, 
  'gamma': 1, ...}
 F1:  0.8584
-ROC:  0.8567
+ROC: 0.8567
 ```
 
 ran with threshold of .6 (instead of .5) for a vote going yea instead of nay, f1 score gets up to random forest levels, 
@@ -271,4 +271,8 @@ I then run the entire dataframe through the model, and append the predictions fr
 for faster retrieval of information in the web app, and save that df as an artifact. I also save the features, scalar, 
 and model as .sav files, which will eventually be hosted on AWS for retrieval when creating a sagemaker docker container 
 for predictions.
+
+## Building a web app front end (and containerizing)
+
+## Building a sagemaker backend on AWS
 
