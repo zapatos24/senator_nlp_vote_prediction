@@ -8,7 +8,7 @@ import os
 import joblib
 
 from df_api import DataframeHandler
-from model_api import ModelHandler
+# from model_api import ModelHandler
 
 
 def new_bill_search():
@@ -19,11 +19,11 @@ def new_bill_search():
 
     bill_summary = st.sidebar.text_area('Bill summary:', "")
     sponsor_party = st.sidebar.selectbox('Sponsor Party', ['D', 'R', 'I'])
-    num_cospon_D = st.sidebar.slider("Democrat Cosponsors", 0, sum(cong_senators.party == 'D'))
-    num_cospon_R = st.sidebar.slider("Republican Cosponsors", 0, sum(cong_senators.party == 'R'))
-    num_cospon_I = st.sidebar.slider("Independent Cosponsors", 0, sum(cong_senators.party == 'I'))
+    num_co_D = st.sidebar.slider("Democrat Cosponsors", 0, sum(cong_senators.party == 'D'))
+    num_co_R = st.sidebar.slider("Republican Cosponsors", 0, sum(cong_senators.party == 'R'))
+    num_co_ID = st.sidebar.slider("Independent Cosponsors", 0, sum(cong_senators.party == 'I'))
 
-    num_cospon_tot = num_cospon_D + num_cospon_R + num_cospon_I
+    num_co_tot = num_co_D + num_co_R + num_co_ID
 
     st.write('**Congress**: ', congress)
     st.write('**Bill Number**: Test Bill')
@@ -44,7 +44,7 @@ def new_bill_search():
         client = session.client('sagemaker-runtime')
 
         custom_attributes = ''
-        endpoint_name = "senator_nlp_vote_prediction"  # Endpoint name.
+        endpoint_name = "senator-nlp-vote-prediction"  # Endpoint name.
         content_type = "application/json"              # The MIME type of the input data in the request body.
         accept = "application/json"                    # The desired MIME type of the inference in the response.
         payload = "..."                                # Payload for inference.
@@ -86,16 +86,16 @@ def new_bill_search():
 
         if TEST_SERVER:
             if TEST_ITEM:
-                response = score(test_item)
+                response = score(json.dumps(test_item))
             else:
-                response = score(pred_item)
+                response = score(json.dumps(pred_item))
         else:
             if TEST_ITEM:
                 response = score_local(test_item)
             else:
                 response = score_local(pred_item)
 
-        pred_df = pd.read_json(json.loads(response['score_data']))
+        pred_df = pd.read_json(json.loads(response)['score_data'])
 
         def pass_or_not(df, column):
             if sum(df[column] == 'yea') > 50:
