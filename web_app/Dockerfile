@@ -7,7 +7,10 @@ FROM base AS compile-image
 
 RUN apt-get update && \
     apt-get install -y \
-    build-essential \
+    build-essential
+
+RUN apt-get update && \
+    apt-get install -y \
     gcc
 
 RUN python -m venv /opt/web_app/env
