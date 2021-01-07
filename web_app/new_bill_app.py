@@ -82,7 +82,7 @@ def new_bill_search():
 
 
         TEST_SERVER = True #os.getenv('TEST_SERVER', True)
-        TEST_ITEM = True
+        TEST_ITEM = False
 
         if TEST_SERVER:
             if TEST_ITEM:
