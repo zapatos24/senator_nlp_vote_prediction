@@ -2,22 +2,22 @@
 # to execute: call make build_and_push from root dir
 
 # The name of our algorithm
-algorithm_name=apps/senator-nlp-vote-prediction
+app_name=apps/senator-nlp-vote-prediction
 profile=jeremy_sagemaker
 
 account=$(aws sts get-caller-identity --profile "${profile}" --query Account --output text)
 
 region=us-east-1
 
-fullname="${account}.dkr.ecr.${region}.amazonaws.com/${algorithm_name}:latest"
+fullname="${account}.dkr.ecr.${region}.amazonaws.com/${app_name}:latest"
 
 # If the repository doesn't exist in ECR, create it.
 
-aws ecr describe-repositories --repository-names "${algorithm_name}" --profile "${profile}" > /dev/null 2>&1
+aws ecr describe-repositories --repository-names "${app_name}" --profile "${profile}" > /dev/null 2>&1
 
 if [ $? -ne 0 ]
 then
-    aws ecr create-repository --repository-name "${algorithm_name}" --profile "${profile}" > /dev/null
+    aws ecr create-repository --repository-name "${app_name}" --profile "${profile}" > /dev/null
 fi
 
 # Get the login command from ECR and execute it directly
@@ -30,11 +30,11 @@ export AWS_SECRET_ACCESS_KEY=$(aws --profile "${profile}" configure get aws_secr
 # Build the docker image locally with the image name and then push it to ECR
 # with the full name.
 
-docker build  -t ${algorithm_name} . \
+docker build  -t ${app_name} . \
 --build-arg AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
 --build-arg AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
 --no-cache
 
-docker tag ${algorithm_name} ${fullname}
+docker tag ${app_name} ${fullname}
 
 docker push ${fullname}
