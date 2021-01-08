@@ -5,7 +5,7 @@
 #################################################################################
 
 PROJECT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
-BUCKET = senator-nlp-vote-prediction
+APP = senator-nlp-vote-prediction
 PROFILE = jeremy_sagemaker
 PYTHON_INTERPRETER = python3
 
@@ -37,4 +37,4 @@ build:
 	sh ./build_local.sh
 
 local_server:
-	docker run --rm -p 8501:8501 apps/senator-nlp-vote-prediction
+	docker run -i -t --rm --env-file=.env -p 8501:8501 --name=$(APP) "apps/$(APP)"

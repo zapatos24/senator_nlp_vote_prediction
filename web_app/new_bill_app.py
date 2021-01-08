@@ -42,18 +42,7 @@ def new_bill_search():
     if start:
         # for session construction when in Docker container
         try:
-            profile_name = os.getenv('AWS_PROFILE')
-            st.write(profile_name)
-            print(profile_name)
-            aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
-            st.write(aws_access_key_id)
-            print(aws_access_key_id)
-            aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
-            st.write(aws_secret_access_key)
-            print(aws_secret_access_key)
-
-            session = boto3.Session(profile_name=os.getenv('AWS_PROFILE'),
-                                    aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
+            session = boto3.Session(aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
                                     aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
                                     region_name=os.getenv('AWS_DEFAULT_REGION')
                                     )
