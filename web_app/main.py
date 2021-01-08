@@ -27,6 +27,17 @@ def main():
 def new_bill_page(state):
     st.markdown('# New Bill Voting')
 
+    st.write('do i have environment variables')
+    profile_name = os.getenv('AWS_PROFILE')
+    st.write(profile_name)
+    print(profile_name)
+    aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
+    st.write(aws_access_key_id)
+    print(aws_access_key_id)
+    aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
+    st.write(aws_secret_access_key)
+    print(aws_secret_access_key)
+
     st.markdown('This is specific to the 116th Congress')
     st.markdown('Please enter your bill information in the sidebar')
 

@@ -35,12 +35,36 @@ def new_bill_search():
     st.write('**Total Cosponsors**: ', num_co_tot)
 
 
-    #set button to send to model
+    # set button to send to model
     start = st.sidebar.button('Bill Look Up')
     stop = st.sidebar.button('Reset')
 
     if start:
-        session = boto3.Session(profile_name='jeremy_sagemaker')
+        # for session construction when in Docker container
+        try:
+            profile_name = os.getenv('AWS_PROFILE')
+            st.write(profile_name)
+            print(profile_name)
+            aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
+            st.write(aws_access_key_id)
+            print(aws_access_key_id)
+            aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
+            st.write(aws_secret_access_key)
+            print(aws_secret_access_key)
+
+            session = boto3.Session(profile_name=os.getenv('AWS_PROFILE'),
+                                    aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
+                                    aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
+                                    region_name=os.getenv('AWS_DEFAULT_REGION')
+                                    )
+            st.write('using env boto3 session')
+            print('using env boto3 session')
+        # for local testing
+        except:
+            session = boto3.Session(profile_name='jeremy_sagemaker')
+            st.write('using local boto3 session')
+            print('using local boto3 session')
+
         client = session.client('sagemaker-runtime')
 
         custom_attributes = ''

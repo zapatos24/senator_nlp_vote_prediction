@@ -1,9 +1,9 @@
 # base image
-FROM python:3.7 as base
+FROM python:3.7
 
 
 #----compile image------------------------------
-FROM base AS compile-image
+#FROM base AS compile-image
 
 RUN apt-get update && \
     apt-get install -y \
@@ -24,14 +24,14 @@ RUN pip install -r requirements.txt
 
 
 #----build image -------------------------------
-FROM base AS build-image
-COPY --from=compile-image opt/web_app/env opt/web_app/env
+#FROM base AS build-image
+#COPY --from=compile-image opt/web_app/env opt/web_app/env
 
 # exposing default port for streamlit
 EXPOSE 8501
 
 # Make sure we use the virtualenv:
-ENV PATH="/opt/web_app/env/bin:$PATH"
+#ENV PATH="/opt/web_app/env/bin:$PATH"
 COPY . /opt/web_app
 
 #set some environmental variables
