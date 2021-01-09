@@ -1,7 +1,7 @@
 import streamlit as st
-from streamlit.ReportThread import get_report_ctx
+from streamlit.report_thread import get_report_ctx
 from streamlit.hashing import _CodeHasher
-from streamlit.server.Server import Server
+from streamlit.server.server import Server
 
 from old_bill_app import old_bill_search
 from new_bill_app import new_bill_search
@@ -103,7 +103,8 @@ class _SessionState:
 
 
 def _get_session():
-    session_id = get_report_ctx().session_id
+    ctx = get_report_ctx()
+    session_id = ctx.session_id
     session_info = Server.get_current()._get_session_info(session_id)
 
     if session_info is None:

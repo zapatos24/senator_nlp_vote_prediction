@@ -3,8 +3,10 @@ import os
 import joblib
 
 class DataframeHandler:
-    path = os.path.join(os.path.abspath(os.getenv('XGB_MODEL_PATH')), 'pred_xgb_df.sav')
-    # path = '../model_artifacts/pred_xgb_df.sav'
+    try:
+        path = os.path.join(os.path.abspath(os.getenv('XGB_MODEL_PATH')), 'pred_xgb_df.sav')
+    except:
+        path = '../code_artifacts/pred_xgb_df.sav'
     df = joblib.load(path)
 
 
@@ -49,15 +51,15 @@ class DataframeHandler:
 
 
         if len(col_names) == 0:
-            return df[unique_col].unique()
+            return cls.df[unique_col].unique()
 
         if len(col_names) == 1:
-            slice_df = df[df[col_names[0]] == col_values[0]]
+            slice_df = cls.df[cls.df[col_names[0]] == col_values[0]]
             return slice_df[unique_col].unique()
 
         if len(col_names) == 2:
-            slice_df = df[(df[col_names[0]] == col_values[0]) & 
-                          (df[col_names[1]] == col_values[1])]
+            slice_df = cls.df[(cls.df[col_names[0]] == col_values[0]) &
+                          (cls.df[col_names[1]] == col_values[1])]
             return slice_df[unique_col].unique()
 
         print('Something went wrong')
