@@ -1,4 +1,4 @@
-.PHONY: clean lint requirements build
+.PHONY: clean lint requirements build build_and_push
 
 #################################################################################
 # GLOBALS                                                                       #
@@ -35,6 +35,9 @@ lint:
 
 build:
 	sh ./build_local.sh
+
+build_and_push:
+	sh ./build_and_push.sh
 
 local_server:
 	docker run -i -t --rm --env-file=.env -p 8501:8501 --name=$(APP) "apps/$(APP)"
