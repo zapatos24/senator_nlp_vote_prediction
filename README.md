@@ -1,6 +1,15 @@
 # Senator Vote Prediction 
 ### Using Bills and Vote History to Predict Allegiance
 
+The app created to explore this model can be found at https://senator-prediction.jeremytraberowens.com. 
+
+For cost-effectiveness, 
+the Sagemaker backend may not always be running, but the comparison of the model against older bills can always be
+explored. Should you like to explore how the model behaves for proposed, as yet unseen bills, please email 
+jeremy [at] jeremytraberowens [dot] com to turn the service on.
+
+## Introduction
+
 The goal of this project was multi-fold. From a curiosity standpoint, I'm most interested in politics and civic tech, 
 and I wanted to know if ML could help people predict how the votes on a given bill would swing in Congress, as those 
 laws have vast repercussions throughout our entire country (the USA in my case).
@@ -274,5 +283,40 @@ for predictions.
 
 ## Building a web app front end (and containerizing)
 
+There are two main containers that I built to present this model to the world. One is the front end web application 
+(what's in the web_app folder) that is built using streamlit and allows a user to either: 
+1. See how the model compares against how the actual vote went for that bill or
+2. Create a new proposed bill (adding in summary information as well as how many cosponsors of each party are on the bill)
+
+The main.py file initializes the sidebar and creates a session state (the class also defined in the main.py file) 
+based on the user's choice of which part of the application they want to view (new bills or old bill comparison). This
+session state allows the sidebar to persist with the same entry fields throughout the building process for a new proposed
+bill. Once the new or old bill direction is chosen, the main file calls the new_bill_search or old_bill_search function
+(respectively) that exist in their own python files.
+
+If working with an old bill, it starts by initializing a DataframeHandler object, which is the backend workhorse for 
+parsing which congresses are available to view, and what bill numbers exist in that congress to view votes for.
+The user chooses which congress they want to view (anything from the 113th to the 116th
+congress) and which bill from that congress they want to view a comparison for. Once the "Bill Look Up" button is
+pressed, the DataframeHandler object pulls out the information for that specific bill, displays the top line metrics for
+how the model compares against reality, and plots the predicted likelihood of a vote against each senator's DW 
+nominate score (which is roughly a score on how liberal or conservative a congressperson is, more info here: 
+https://en.wikipedia.org/wiki/NOMINATE_(scaling_method)). 
+
+![Top Line Metrics](images/app_vote_metrics.png)
+
+![Voting Graph](images/app_vote_graph.png)
+
+If working with a new proposed bill, we still initialize a DataframeHandler object so that we know which senators from
+which Congress we want predictions for. The user is asked to enter pertinent information (a summary of the proposed
+bill, and the number of cosponsors from each party, as well as independents) before the information is compiled and
+sent to a Sagemaker endpoint on AWS. That endpoint (expanded on below) creates the calculated fields it needs from the
+user passed data, and returns a json object, which is parsed into a dataframe and output into human language voting
+metrics and graphed for a visualization of where each senator lands on their predicted vote probability.
+
 ## Building a sagemaker backend on AWS
+
+
+
+## Getting the app hosted and running on AWS Servers
 
