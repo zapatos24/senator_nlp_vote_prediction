@@ -314,9 +314,37 @@ sent to a Sagemaker endpoint on AWS. That endpoint (expanded on below) creates t
 user passed data, and returns a json object, which is parsed into a dataframe and output into human language voting
 metrics and graphed for a visualization of where each senator lands on their predicted vote probability.
 
+All of the code for this front end app exists in a Docker image that lives on AWS ECR, which is then pulled into an AWS
+EC2 instance. Once I SSH'd into the instance and pulled down the docker image from ECR, I ran a container, passing in the
+needed AWS credentials as environmental variables (so they weren't hardcoded anywhere) so that the front end could
+appropriatly call the sagmaker endpoint for predictions of new bills.
+
 ## Building a sagemaker backend on AWS
 
+The Docker container that's eventually run on Sagemaker is a Flask app that listens for any data sent to the
+ip address/invocations. When data is POSTed to /invocations, it used the ModelHandler object (in model_api.py) to
+transform the data (including vectorizing the bill summary with the Universal Sentence Encoder) into a dataframe that the
+trained model can make a vote prediction on. The ModelHandler returns a dataframe consisting of the name of the senator,
+ their party, their DW Nominate score, the probability of a yea vote, and the predicted actual cast of their vote
+(currently using a .9 probability threshold for a guaranteed yes vote).
 
+That dataframe is then passed back to the Flask app as a json file, and the front end web app decodes the json back to
+a pandas dataframe for showing vote metrics and probability graphs.
 
 ## Getting the app hosted and running on AWS Servers
 
+While it's wonderful that the two Docker containers exist on AWS and can talk to each other, what matters more is can
+this be a useful product for whips, or at the very least, a fun app for citizens to play around with. To wrap this up, 
+I transferred my domain from GoDaddy to Route 53 (quite the process involving nameserver changes and super secret 
+authorizations) and requested an SSL certificate so people could securely access the subdomain of my personal domain
+that this app exists on. I set up an Elastic IP address for the EC2 container as well, so at least I always had a set
+of numbers to fall back on when testing the app online.
+
+I then set up an Application Load Balancer as a reverse proxy to route the http traffic to the more secure https site
+(props to [Ahmed Besbes on Medium](https://medium.com/swlh/end-to-end-machine-learning-from-data-collection-to-deployment-ce74f51ca203) 
+for the inspiration). After creating all the target and security groups necessary, 
+and making sure the http redirect was set up, I then could view the app through my load-balancer-dns-name-amazonaws.com!
+
+For the finishing polish, I created a record set for my chosen subdomain in my Route 53 hosted zone, with the Alias 
+set to my Application Load Balancer. 30 minutes later, post DNS propogation, my app was ready for the world to see at 
+https://senator-prediction.jeremytraberowens.com!
