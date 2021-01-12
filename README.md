@@ -288,14 +288,14 @@ yea vote to .9, and the matrix shifts as such:
 While it lowers our F1 score slightly, the more balanced classes are better served in the eventual product, though we
 keep the same ROC score as before.
 
-## Creating artifacts for the web application
+## 05 - Creating artifacts for the web application
 
 I then run the entire dataframe through the model and append the predictions from the model onto the main dataframe 
 for faster retrieval of information in the web app. I save that dataframe as an artifact. I also save the features, 
 scalar, and model as .sav files, which will eventually be hosted on AWS for retrieval when creating a sagemaker docker 
 container for predictions.
 
-## Building a web app front end (and containerizing)
+## 06 - Building a web app front end (and containerizing)
 
 There are two main containers that I built to present this model to the world. One is the front end web application 
 (what's in the web_app folder) that is built using streamlit and allows a user to either: 
@@ -333,7 +333,7 @@ EC2 instance. Once I SSH'd into the instance and pulled down the docker image fr
 needed AWS credentials as environmental variables (so they weren't hardcoded anywhere) so that the front end could
 appropriatly call the sagmaker endpoint for predictions of new bills.
 
-## Building a sagemaker backend on AWS
+## 07 - Building a sagemaker backend on AWS
 
 The Docker container that's eventually run on Sagemaker is a Flask app that listens for any data sent to the
 ip-address/invocations. When data is POSTed to /invocations, it uses the ModelHandler object (in model_api.py) to
@@ -345,7 +345,7 @@ their party, their DW Nominate score, the probability of a yea vote, and the pre
 That dataframe is then passed back to the Flask app as a json file, the Flask app send that json back to the front end,
 and the front end web app decodes the json back to a pandas dataframe for showing vote metrics and probability graphs.
 
-## Getting the app hosted and running on AWS Servers
+## 08 - Getting the app hosted and running on AWS Servers
 
 While it's wonderful that the two Docker containers exist on AWS and can talk to each other, what matters more is can
 this be a useful product for whips, or at the very least, a fun app for citizens to play around with. To wrap this up, 
