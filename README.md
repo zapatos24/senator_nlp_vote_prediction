@@ -103,43 +103,53 @@ I then pickle that combined DataFrame for baseline modeling and eventually more 
 
 ## 03 - Baseline Model
 
-Drop all rollcalls except last for each bill (to make sure hard fought bills aren't oversampled in dataset)
+For developing this model, I chose to drop all rollcalls except for the last for each bill (to make sure hard fought 
+bills that had multiple voting rounds weren't oversampled in the dataset)
 ** check with Christophe on this
 
-TTS .3
-run non-text data through standard scalar
-SMOTE imbalanced dataset (far more nays than yeas)
+I used a Train-Test-Split of 70-30, ran all the non-text data through a standard scalar, and utilized SMOTE to balance
+out the otherwise imbalanced dataset (in the base dataset there are far more nay votes than yea votes).
 
-run recursive feature engineering on dataset (assuming logit reg model)
+I ran a recursive feature engineering ranking on the dataset, assuming a logistic regression model, and aimed for 
+around 15 features before taking the modified dataset and fitting it to the logistic regression model. The prediction
+results can be found below:
 
-fit/predict logit model
 ![Logit Prelim Confusion Matrix](images/logit1_base_confusion_report.png)
-roc-auc score
 ![Logit Prelim ROC Graph](images/logit1_base_roc.png)
 
-Random Forest
-TTS .3, scale, smote
+I also wanted to see how a Random Forest algorithm would perform, as it's consistently one of the easiest to implement
+and represents close to the best we can do without incorporating vectorized text data. Using the same Train-Test-Split, 
+scalar, and SMOTE, and using all the available features, instead of just those from the recursive feature engineering
+done for the logistic regression model, we end up with the following metrics on the prediction set:
 
-fit/predict logit model
 ![Random Forest Confusion Matrix](images/rf_base_confusion_report.png)
-roc-auc score
 ![Random Forest ROC Graph](images/rf_base_roc.png)
 
-improvement, but want to make sure it's apples to apples comparison for two baselines
+There's definite improvement here over the logistic regression model, both in our F1 and our ROC score, but I wanted to 
+make sure it's an apples to apples comparison for the two baseline models. I pulled out the feature importance for all 
+the features used in the Random Forest model and plotted them to see if there were any major drop off points.
 
 ![Random Forest Feature Importance](images/rf_base_feature_import_graph.png)
 
-iterated through logit using more and more features (in order of rf importance)
+It's a fairly even slope, though there is a noticeable drop around party_R, the 18th feature.
+
+To be sure, I iterated through an increasing number of features (in order of importance from the above graph), and ran
+a fit/predict (using all the same methods as before) on a logistic regression, and below you can see the F1 score for 
+every iteration.
 
 ![Logit Feature Test](images/logit_feature_iteration.png)
 
-chose 18 features for reasons, re-ran logit with same TTS .3, scale, smote
+I chose to stick with 18 features, as at the 18th feature we hit an F1 score of .792 (rounded), and it was the lowest
+number of features I could use to achieve that F1 score, which did not meaningfully increase even by the 27th iteration. 
+
+I re-ran the logistic regression with those 18 features, using the same methods as before and here were the results
+for that new baseline.
 
 ![Logit Base Confusion Matrix](images/logit2_base_confusion_report.png)
-roc-auc score
 ![Logit Base ROC Graph](images/logit2_base_roc.png)
 
-No real change, but saved 18 chosen features for use in more advanced model
+Alas, there was no real change from the previous iteration of the logistic regression model, but I pickled the 18 chosen 
+features for use in more advanced XGBoost model.
 
 
 ## 04 - XGBoost Model
@@ -167,15 +177,15 @@ Turn the embeddings into df, join back with original bill summaries, join back t
 
 ![XGB NLP ROC](images/xgb_nlp_roc.png)
 
-Incorporation of text appears to improve the F1 score, but slightly decrease the ROC score. Suggests that while the
+Incorporation of text appears to improve the F1 score, but slightly decrease the ROC score. This suggests that while the
 model improves at the rounded binary classification of a yea or nea vote, those votes it predicts incorrectly it
 predicts more confidently in the opposite direction.
 
 ### Hyperparameter Tuning
 
-The final thing I did with the XGBoost model is some hyperparameter tuning, see what additional shifts we can make to 
-eek out the last of that F1 score. I performed a nested iteration through 'n_estimators', 'max_depth', 'learning_rate', 
-'subsample', 'colsample_bytree', and 'gamma'. 
+The final thing I did with the XGBoost model is some hyperparameter tuning, to see what additional shifts we can make in 
+eeking out the last of that F1 score and ROC curve. I performed a nested iteration through 'n_estimators', 'max_depth', 
+'learning_rate', 'subsample', 'colsample_bytree', and 'gamma', seen below:
 
 ```python
 n_estimators = [100, 500, 1000]
@@ -210,7 +220,7 @@ for a in n_estimators:
 
 Believe me, I hated writing that many nested loops as you do reading it.
 
-I then plotted the f1 score against the roc score and from all those iterations, I visually chose the hyperparameter 
+I then plotted the f1 score against the roc score and from all those iterations. I visually chose the hyperparameter 
 sets with the highest F1 score, the one with the highest ROC score, and one that was a balance between the two.
 
 I then tested each of those hyperparameter sets using the same oversampled, nlp-included train and test sets as before, 
@@ -246,8 +256,8 @@ F1:  0.8584
 ROC: 0.8567
 ```
 
-ran with threshold of .6 (instead of .5) for a vote going yea instead of nay, f1 score gets up to random forest levels, 
-with ROC a significant improvement over RF
+I ran with threshold of .6 (instead of .5) for a vote going yea instead of nay, and our f1 score gets up to random 
+forest levels, but with a significant improvement in our ROC over the Random Forest model.
 
 ![XGB Hyper Confusion Matrix - Low Threshold](images/xgb_best_hyper_6_thresh_confusion_report.png)
 
@@ -255,12 +265,12 @@ with ROC a significant improvement over RF
 
 We can see how imbalanced the confusion matrix is though, and in practice, a whip who was using this product would
 assume the votes were there too often, when they actually weren't. So I raised the threshold for a yea vote to .9, and
-the matrix shifts as such
+the matrix shifts as such:
 
 ![XGB Hyper Confusion Matrix - High Threshold](images/xgb_best_hyper_9_thresh_confusion_report.png)
 
-while it lowers our F1 score slightly, the more balanced classes are better served in the eventual product, though we
-keep the same ROC score as before
+While it lowers our F1 score slightly, the more balanced classes are better served in the eventual product, though we
+keep the same ROC score as before.
 
 ## Creating artifacts for the web application
 
