@@ -47,82 +47,59 @@ the United States. There are a few .csv files for each senate (113-116) that are
 the members of each congress, the overall votes for bills on the floor (aka rollcalls), and the individual votes cast by
 each member in each congress.
 
-open secrets - future use for bringing in campaign donation info into votes
-was able to create a table of CID, FecCandID, BioguideID, Name CSV for senators that did not yet exist on internet
+I also utilized the OpenSecrets API to pull down contribution information for every senator that served in the range of 
+congresses I was analyzing. While the MVP version of this model did not end up using contribution data, the combination
+of voteview data and open secrets data allowed me to create a table that I could not find anywhere else on the internet,
+one that acts as a reference table for any senator's CID (ID for open secrets), BioguideID (used by congress.gov), 
+icpsr (an ID used by Voteview and other political science resources), and their FEC Candidate ID (how they are
+referenced in FEC databases).
 
 ![Senator Reference Table](images/senator_ref_df_head.png)
 
-pull all open secrets data, but Remaining ids are for senators who were appointed due to an elected senator's death, 
+There are a few profiles for Senators that are missing from the OpenSecrets search, but those ids, as I discovered
+through some research, are for senators who were appointed due to an elected senator's death, 
 or left shortly after winning due to scandal.
 
-propublica api - gather bill summaries, subjects list, and amendments from initial bill (ignore treaty documents, not
-relevant to this project)
+For election voting history (so I can calculate how safe a certain senator's district is, which could certainly
+influence voting patterns), I went to the MIT Election Lab, where they have a downloadable .tsv file of all election
+results back to 1976. That file can be found 
+[here](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/PEJ5QU).
 
-remaining missing bills are those that are the National Defense Authorization Act yearly fiscal bills
+The other major data source used is via the ProPublica API, which allowed me to gather the summaries, subjects, and
+amendments for all the bills that wanted to train and validate the model on. I ignored treaty documents in this case, as
+they were not relevant to this project. I also opted to ignore the National Defense Authorization Act yearly fiscal 
+bills, as they were mostly pro forma votes and would just be extra noise for the model.
 
 ## 02 - DF construction and Feature Engineering
 
-making all dataframes from gathered data
+While it's such a major component to any model development, very few people care about the dataframe construction and
+feature engineering process, so I'll just say after joining all the above data together, and doing some transformations
+and feature engineering, I end up with the following, most pertinent features to send to the baseline model:
 
-join all votes from congress 113 - 116 (dropping those of the vice president, adds unnecessary noise to model)
+Senator info:
+- DW Nominate dimension 1
+- DW Nominate dimension 2
+- What percent of the vote they had in their most recent campaign
+- Boolean for if the vote is being cast in an election year
+- Their tenure in the Senate (how long since they were first voted in)
+- Their age
+- Boolean for if they are the sponsor of the bill being voted on
+- Boolean for if the sponsor of the bill is from their same party
+- Dummy variables for what their party affiliation is
+- How many cosponsors of the bill are of the same party as the senator (standard and exponentiated)
 
-join all senators from congress 113-116
-    drop pres/vice-pres
-    change the party code to a readable letter
-    separate out name parts for easier joining of dataframes later
+Bill/Congress info:
+- Boolean for if the sponsor party of the bill is the lead party in the Senate
+- The percentage of the total cosponsors that are Democrat or Republican
+- Of those percentages, which is of the lead party
+- Dummy variable for if the sponsor party is Democrat, Republican, or Independent
+- Total cosponsors of the bill, and how many there are of each party (standard and exponentiated) 
+- If the lead party in the Senate is Democrat or Republican
 
-join with votes df and add column for the lead party for each congress
+I drop any bills that lack sponsor information, or where there are cast codes that are present or absent (aka, not a
+true yea or nay vote).
 
-join all the rollcalls from each congress together
-
-join to votes/members dataframe
-
-pull out nomination and treaty votes (to reduce model noise)
-
-using fancy table, added cid info to each row in the df (though not currently in use)
-
-created df of major industries that contributed to each senator, but did not incorporate into final model
-
-parse resultant df for all bill numbers, search pro-pub summaries and subjects
-parse bill info (summary and cosponsors) into dict from 'summary' pro-pub json
-parse party cosponsor count into dict
-parse all subjects (if any) into string of all subjects
-    #add the subjects string to the dictionary
-add the full dictionary to a list of all bills
-
-add all bill info to the votes, members, rollcalls, ids df
-
-add industry info for each senator to the main df
-    we create feature for what campaign year relates to congress number, since they are not aligned
-
-make df for election data back to 1976
-reduce election df to just those who won each election
-fix Lisa Murkowski's nan value for the 2010 election
-clean up party affiliations
-parse out first and last names
-calc how close the race was
-make a df for each time someone one their first election by dropping duplicates, keeping their first win
-merge the first year elected back onto election df
-
-make the main dataframe by merging election data with all other info (votes, members, ids, etc.)
-
-create feature for if it's an election year
-senator's tenure in office (since they first joined)
-senator's age
-if they're a sponsor of a given bill
-whether or not the sponsor of the bill is the lead party in the senate
-percentage of cosponsors from a given party on a bill
-what is the percentage of cosponsors from the lead party
-is the sponsor the same party as the given senator
-make interaction of party with cosponsors of that party
-exponentiate cosponsor values
-
-dummy variable party and sponsor_party columns
-dummy variable lead party designation
-drop anywhere df lacks sponsor info
-drop any cast codes that are present or absent, and change cast code 6 ('nay') to 0
-
-pickle for baseline and advanced ML modeling
+I then pickle that combined DataFrame for baseline modeling and eventually more advanced ML modeling with XGBoost.
 
 ## 03 - Baseline Model
 
