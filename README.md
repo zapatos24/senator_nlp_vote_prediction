@@ -154,36 +154,52 @@ features for use in more advanced XGBoost model.
 
 ## 04 - XGBoost Model
 
-drop all rollcalls except last, and use top 18 features from logit/RF
+XGBoost is a machine learning algorithm that has taken the world by storm, and is especially well suited to 
+vectorized text, so I decided to see if I could improve the predictive accuracy (or in this case, F1 and ROC) using 
+said algorithm.
 
-originally just randomly sampled all data, but later determined that randomly separating out individual bills would
-ensure no information from my training environment leaked into my test environment
+As before, I drop all rollcalls except the last for each bill, and use the top 18 features I pickled from the baseline
+model.
+
+I originally randomly split all data in my train-test-split, but later determined that randomly separating out 
+individual bills was a more scientific approach, and would ensure no information from my training environment leaked 
+into my test environment.
+
+Just to see where I stood before adding in vectorized text, I ran the XGBoost model using only the 18 pickled features,
+and below you can see the results:
 
 ![XGB No NLP Confusion Matrix](images/xgb_no_nlp_confusion_report.png)
-
 ![XGB No NLP ROC](images/xgb_no_nlp_roc.png)
 
-slight improvement, but no major change from logit model
-better performance in classifying false values, worse in predicting true values, though an overall improved ROC
-score (7%)
+There is a slight improvement, but no major change from logistic regression baseline model.
+The XGBoost model has better performance in classifying false values (comparatively), but worse performance in 
+predicting true values, though there is an overall improved ROC score (7% improvement).
+
+Let's see what I can do with some NLP mixed in instead!
 
 ### XGB with NLP
 
-Utilize the Universal Sentence Encoder from google to vectorize bills summaries
+Since pre-trained text vectorizers are far easier to implement and have been trained on far more text data than I have 
+in my own project, I decided to utilize the Universal Sentence Encoder from google to vectorize the bill summaries I had
+available. While the MVP just focuses on summaries, later interations will include the entire bill text and/or 
+amendments made throughout the voting process.
 
-Turn the embeddings into df, join back with original bill summaries, join back to main_df, oversample training set
+I extract the bill summaries, send then through the USE, take those embeddings and turn them into thier own dataframe, 
+join that dataframe back with the list of original bill summaries, join that back to main dataframe, oversample 
+the training set with SMOTE (as we still want to make sure our training set is balanced), and run that through an
+XGBoost algorithm. Below are the results!
 
 ![XGB NLP Confusion Matrix](images/xgb_nlp_confusion_report.png)
 
 ![XGB NLP ROC](images/xgb_nlp_roc.png)
 
-Incorporation of text appears to improve the F1 score, but slightly decrease the ROC score. This suggests that while the
-model improves at the rounded binary classification of a yea or nea vote, those votes it predicts incorrectly it
-predicts more confidently in the opposite direction.
+The incorporation of text appears to improve the F1 score, but slightly decreases the ROC score. This suggests that 
+while the model improves at the rounded binary classification of a yea or nea vote, those votes it predicts incorrectly 
+it predicts more confidently in the opposite direction.
 
 ### Hyperparameter Tuning
 
-The final thing I did with the XGBoost model is some hyperparameter tuning, to see what additional shifts we can make in 
+The final thing I did with the XGBoost model is some hyperparameter tuning, to see what additional shifts I could make in 
 eeking out the last of that F1 score and ROC curve. I performed a nested iteration through 'n_estimators', 'max_depth', 
 'learning_rate', 'subsample', 'colsample_bytree', and 'gamma', seen below:
 
@@ -218,7 +234,7 @@ for a in n_estimators:
                             clf_xgb.fit(X_over_vec[model_cols], y_over)
 ```
 
-Believe me, I hated writing that many nested loops as you do reading it.
+Believe me, I hated writing that nested loop as much as you hate reading it.
 
 I then plotted the f1 score against the roc score and from all those iterations. I visually chose the hyperparameter 
 sets with the highest F1 score, the one with the highest ROC score, and one that was a balance between the two.
@@ -263,9 +279,9 @@ forest levels, but with a significant improvement in our ROC over the Random For
 
 ![XGB Hyper ROC](images/xgb_best_hyper_roc.png)
 
-We can see how imbalanced the confusion matrix is though, and in practice, a whip who was using this product would
-assume the votes were there too often, when they actually weren't. So I raised the threshold for a yea vote to .9, and
-the matrix shifts as such:
+We can see how imbalanced the confusion matrix is though, and in practice, a majority or minority whip who was using 
+this product would assume the votes were there too often, when they actually weren't. So I raised the threshold for a 
+yea vote to .9, and the matrix shifts as such:
 
 ![XGB Hyper Confusion Matrix - High Threshold](images/xgb_best_hyper_9_thresh_confusion_report.png)
 
@@ -274,10 +290,10 @@ keep the same ROC score as before.
 
 ## Creating artifacts for the web application
 
-I then run the entire dataframe through the model, and append the predictions from the model onto the main dataframe, 
-for faster retrieval of information in the web app, and save that df as an artifact. I also save the features, scalar, 
-and model as .sav files, which will eventually be hosted on AWS for retrieval when creating a sagemaker docker container 
-for predictions.
+I then run the entire dataframe through the model and append the predictions from the model onto the main dataframe 
+for faster retrieval of information in the web app. I save that dataframe as an artifact. I also save the features, 
+scalar, and model as .sav files, which will eventually be hosted on AWS for retrieval when creating a sagemaker docker 
+container for predictions.
 
 ## Building a web app front end (and containerizing)
 
@@ -320,14 +336,14 @@ appropriatly call the sagmaker endpoint for predictions of new bills.
 ## Building a sagemaker backend on AWS
 
 The Docker container that's eventually run on Sagemaker is a Flask app that listens for any data sent to the
-ip address/invocations. When data is POSTed to /invocations, it used the ModelHandler object (in model_api.py) to
+ip-address/invocations. When data is POSTed to /invocations, it uses the ModelHandler object (in model_api.py) to
 transform the data (including vectorizing the bill summary with the Universal Sentence Encoder) into a dataframe that the
 trained model can make a vote prediction on. The ModelHandler returns a dataframe consisting of the name of the senator,
- their party, their DW Nominate score, the probability of a yea vote, and the predicted actual cast of their vote
+their party, their DW Nominate score, the probability of a yea vote, and the predicted actual cast of their vote
 (currently using a .9 probability threshold for a guaranteed yes vote).
 
-That dataframe is then passed back to the Flask app as a json file, and the front end web app decodes the json back to
-a pandas dataframe for showing vote metrics and probability graphs.
+That dataframe is then passed back to the Flask app as a json file, the Flask app send that json back to the front end,
+and the front end web app decodes the json back to a pandas dataframe for showing vote metrics and probability graphs.
 
 ## Getting the app hosted and running on AWS Servers
 
