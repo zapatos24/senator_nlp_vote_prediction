@@ -30,11 +30,22 @@ house congresspeople, who (potentially) rotate out every 2 years.
 
 ## 01 - Data Acquisition
 
-congress 113-116 - why
+This project focuses on the last 8 years of senatorial bodies. Starting in 2012, we have the 113th Congress (through 2014), 
+and we end with the 116th Congress, which existed from 2018 to 2020. This was done party out of necessity, partly by 
+design. For one, the OpenSecrets API does not have any contribution data prior to the 2012 cycle. While the Open Secrets
+data is not a part of the MVP model presented here, it is planned for future versions, and thus training on years
+prior to 2012 would make later OpenSecrets integration very cumbersome. From an industry knowledge standpoint as well, 
+2012 is an inflection point in the extreme divisiveness of the political parties today. We were past the tumult of the 
+2008 financial crisis that was the star of that election cycle, and we existed in a divided government (with the president
+of one political party and at least one house of congress of the other political party). In 2014, the Senate flips to 
+the Republican party, so we have at least 2 years of a Democratic majority in the Senate before a long Republican
+majority in the following 6 years, which bakes in a little noise that's useful for the model to parse out.
 
-voteview votes
-voteview members
-voteview rollcalls
+One of the most prominent sources of data for this project is [Voteview](https://voteview.com/) which houses a
+historical record of all the votes and members of each house of congress, all the way back to the very first congress in
+the United States. There are a few .csv files for each senate (113-116) that are most pertinent to this study, those of
+the members of each congress, the overall votes for bills on the floor (aka rollcalls), and the individual votes cast by
+each member in each congress.
 
 open secrets - future use for bringing in campaign donation info into votes
 was able to create a table of CID, FecCandID, BioguideID, Name CSV for senators that did not yet exist on internet
