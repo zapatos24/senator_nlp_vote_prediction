@@ -105,7 +105,6 @@ I then pickle that combined DataFrame for baseline modeling and eventually more 
 
 For developing this model, I chose to drop all rollcalls except for the last for each bill (to make sure hard fought 
 bills that had multiple voting rounds weren't oversampled in the dataset)
-** check with Christophe on this
 
 I used a Train-Test-Split of 70-30, ran all the non-text data through a standard scalar, and utilized SMOTE to balance
 out the otherwise imbalanced dataset (in the base dataset there are far more nay votes than yea votes).
