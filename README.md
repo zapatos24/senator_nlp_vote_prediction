@@ -6,7 +6,7 @@ The app created to explore this model can be found at https://senator-prediction
 For cost-effectiveness, 
 the Sagemaker backend may not always be running, but the comparison of the model against older bills can always be
 explored. Should you like to explore how the model behaves for proposed, as yet unseen bills, please email 
-jeremy [at] jeremytraberowens [dot] com to turn the service on.
+jeremytraberowens [at] gmail [dot] com to turn the service on.
 
 ## Introduction
 
