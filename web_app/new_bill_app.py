@@ -28,10 +28,10 @@ def new_bill_search():
     st.write('**Bill Number**: Test Bill')
     st.write('**Bill Summary**: ', bill_summary)
     st.write('**Sponsor Party**: ', sponsor_party)
-    st.write('**Democrat Cosponsors**: ', num_cospon_D)
-    st.write('**Republican Cosponsors**: ', num_cospon_R)
-    st.write('**Independent Cosponsors**: ', num_cospon_I)
-    st.write('**Total Cosponsors**: ', num_cospon_tot)
+    st.write('**Democrat Cosponsors**: ', num_co_D)
+    st.write('**Republican Cosponsors**: ', num_co_R)
+    st.write('**Independent Cosponsors**: ', num_co_ID)
+    st.write('**Total Cosponsors**: ', num_co_tot)
 
     # set button to send to model
     start = st.sidebar.button('Bill Look Up')
@@ -76,9 +76,9 @@ def new_bill_search():
             "dataframe": cong_senators.to_json(),
              "summary": bill_summary,
              "sponsor_party": sponsor_party,
-             "num_co_D": num_cospon_D,
-             "num_co_R": num_cospon_R,
-             "num_co_ID": num_cospon_I
+             "num_co_D": num_co_D,
+             "num_co_R": num_co_R,
+             "num_co_ID": num_co_ID
         }
 
 
